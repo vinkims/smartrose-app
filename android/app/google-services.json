@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "91111428660",
+    "project_id": "smartrose-app",
+    "storage_bucket": "smartrose-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91111428660:android:cb6e057157324582a33061",
+        "android_client_info": {
+          "package_name": "com.smartroseapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91111428660-sujmknl579ju8cfm5s5cesog9uif945o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXR6OYC-luLdy0UEu3iJUrniHQChotUCo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91111428660-sujmknl579ju8cfm5s5cesog9uif945o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
