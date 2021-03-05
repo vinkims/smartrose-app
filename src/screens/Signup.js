@@ -42,7 +42,7 @@ export default function SignupScreen({navigation}){
             return
         }
 
-        auth().createUserWithEmailAndPassword(username, password)
+        auth().createUserWithEmailAndPassword(username.trim(), password)
         .then(resp =>{
             console.log(resp)
         })

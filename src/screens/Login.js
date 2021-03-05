@@ -23,7 +23,7 @@ export default function LoginScreen({navigation}){
             return
         }
 
-        auth().signInWithEmailAndPassword(username, password)
+        auth().signInWithEmailAndPassword(username.trim(), password)
         .then(resp =>{
             console.log(resp)
         }).catch(error =>{
