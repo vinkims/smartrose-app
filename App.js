@@ -24,6 +24,7 @@ export default function App(){
                 <Stack.Screen
                     name = 'AuthLoading'
                     component = {AuthLoadingScreen}
+                    options = {{headerShown: false}}
                 />
                 <Stack.Screen
                     name = 'Login'
