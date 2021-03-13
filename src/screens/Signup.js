@@ -1,11 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
+import auth from '@react-native-firebase/auth';
+
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading';
 import SubmitButton from '../components/SubmitButton';
-import auth from '@react-native-firebase/auth';
 import FormCompleteButton from '../components/FormCompleteButton';
 import ServerCommunication from '../utils/ServerCommunication';
+import globalStyles from '../config/globalStyles';
 
 export default function SignupScreen({navigation}){
 
@@ -62,7 +64,7 @@ export default function SignupScreen({navigation}){
 
 
     return(
-        <View style = {styles.container}>
+        <View style = {globalStyles.container}>
             <Text>Signup</Text>
             <FormInput
                 labelName = "username"

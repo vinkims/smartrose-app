@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
+import auth from '@react-native-firebase/auth';
+
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading';
 import SubmitButton from '../components/SubmitButton';
-import auth from '@react-native-firebase/auth';
 import ServerCommunication from '../utils/ServerCommunication';
+import globalStyles from '../config/globalStyles';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -50,7 +52,7 @@ export default function LoginScreen({navigation}){
 
 
     return(
-        <View style = {styles.container}>
+        <View style = {globalStyles.container}>
             <Text>Login</Text>
             <FormInput
                 labelName = "username"

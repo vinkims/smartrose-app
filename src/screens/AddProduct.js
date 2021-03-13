@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, Dimensions, StyleSheet, ScrollView} from 'react-native';
+
 import DropDown from '../components/DropDown';
 import FormInput from '../components/FormInput';
 import SubmitButton from '../components/SubmitButton';
 import {values} from '../config/values';
+import globalStyles from '../config/globalStyles';
 
 export default function AddProductScreen({}){
     
@@ -93,7 +95,7 @@ export default function AddProductScreen({}){
 
     return(
         <ScrollView>
-        <View style = {styles.container}>
+        <View style = {globalStyles.container}>
             <DropDown
                 placeholder = "Select category..."
                 dropDownItems = {values.category}
