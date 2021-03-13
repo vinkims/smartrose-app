@@ -17,6 +17,7 @@ export default function AddProductScreen({}){
     const [size, setSize] = useState('') 
     const [color, setColor] = useState('')
     const [price, setPrice] = useState('')
+    const [label, setLabel] = useState('') 
 
 
     const selectCategory = (cat) =>{
@@ -87,7 +88,8 @@ export default function AddProductScreen({}){
             size: size,
             color: color,
             price: price,
-            status: "IN_STOCK"
+            status: "IN_STOCK",
+            label: label
         }
         console.log("Payload: ", payload)
     }
@@ -124,6 +126,11 @@ export default function AddProductScreen({}){
                     />
                 )
             }
+            <FormInput
+                labelName = "Label"
+                value = {label}
+                onChangeText = {(text) => setLabel(text)}
+            />
             <FormInput
                 labelName = "Size"
                 value = {size}
