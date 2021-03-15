@@ -12,7 +12,8 @@ function initDB(){
             if (res.rows.length == 0){
                 tx.executeSql('DROP TABLE IF EXISTS table_product', []);
                 tx.executeSql(
-                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price VARCHAR(30), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40) )', []
+                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price VARCHAR(30), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40), soldDate VARCHAR(40), sellingPrice VARCHAR(10) )', 
+                    []
                 );
             }
         }
