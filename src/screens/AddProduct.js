@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, Dimensions, StyleSheet, ScrollView} from 'react-native';
+import DatabaseUtil from '../utils/DatabaseUtil'
 
 import DropDown from '../components/DropDown';
 import FormInput from '../components/FormInput';
@@ -17,7 +18,6 @@ export default function AddProductScreen({}){
     const [size, setSize] = useState('') 
     const [color, setColor] = useState('')
     const [price, setPrice] = useState('')
-    const [label, setLabel] = useState('') 
 
 
     const selectCategory = (cat) =>{
@@ -75,7 +75,7 @@ export default function AddProductScreen({}){
     }
 
 
-    const addProduct = () =>{
+    const addProduct = async() =>{
         if (!category || !type || !color || !price){
             alert("Please fill in all details")
             return
@@ -89,9 +89,12 @@ export default function AddProductScreen({}){
             color: color,
             price: price,
             status: "IN_STOCK",
-            label: label
+            timestamp: new Date().toISOString()
         }
         console.log("Payload: ", payload)
+
+        DatabaseUtil.saveProduct(payload)
+
     }
 
 
@@ -127,11 +130,6 @@ export default function AddProductScreen({}){
                 )
             }
             <FormInput
-                labelName = "Label"
-                value = {label}
-                onChangeText = {(text) => setLabel(text)}
-            />
-            <FormInput
                 labelName = "Size"
                 value = {size}
                 onChangeText = {(text) => setSize(text)}
@@ -161,3 +159,5 @@ const styles = StyleSheet.create({
         padding: 10
     }
 })
+
+//TODO: Split price to buying and selling price
