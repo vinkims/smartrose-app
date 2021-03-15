@@ -15,6 +15,8 @@ import AuthLoadingScreen from './src/navigation/AuthLoading';
 import SignupScreen from './src/screens/Signup';
 import HomeScreen from './src/screens/Home';
 import AddProductScreen from './src/screens/AddProduct';
+import SellProductScreen from './src/screens/SellProduct';
+import ViewStockScreen from './src/screens/ViewStock';
 
 const Stack = createStackNavigator();
 
@@ -43,6 +45,16 @@ export default function App(){
                     name = 'AddProduct'
                     component = {AddProductScreen}
                     options = {{title: 'Add Product'}}
+                />
+                <Stack.Screen
+                    name = 'SellProduct'
+                    component = {SellProductScreen}
+                    options = {{title: 'Sell Product'}}
+                />
+                <Stack.Screen
+                    name = 'ViewStock'
+                    component = {ViewStockScreen}
+                    options = {{title: 'Stock'}}
                 />
             </Stack.Navigator>
         </NavigationContainer>
