@@ -21,7 +21,11 @@ const globalStyles = StyleSheet.create({
     },
     tableValueColumn: {
         alignItems: 'flex-start'
-    }
+    },
+    tableView:{
+        width: width,
+        paddingTop: 10,
+    },
 })
 
 export default globalStyles

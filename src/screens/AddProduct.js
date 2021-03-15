@@ -17,7 +17,7 @@ export default function AddProductScreen({}){
     const [subType, setSubType] = useState('')
     const [size, setSize] = useState('') 
     const [color, setColor] = useState('')
-    const [price, setPrice] = useState('')
+    const [price, setPrice] = useState(0)
 
 
     const selectCategory = (cat) =>{
@@ -142,7 +142,7 @@ export default function AddProductScreen({}){
             <FormInput
                 labelName = "Price"
                 value = {price}
-                onChangeText = {(text) => setPrice(text)}
+                onChangeText = {(number) => setPrice(number)}
             />
             <SubmitButton
                 buttonTitle = "Submit"

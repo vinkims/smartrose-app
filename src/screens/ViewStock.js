@@ -24,7 +24,7 @@ export default function ViewStockScreen(){
         <ScrollView>
             <View style = {globalStyles.container}>
                 <Text>Stock</Text>
-                <View style = {styles.tableView}>
+                <View style = {globalStyles.tableView}>
                     <Card>
                         <CardItem cardBody>
                             <TableColumn

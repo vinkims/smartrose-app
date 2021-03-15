@@ -12,7 +12,7 @@ function initDB(){
             if (res.rows.length == 0){
                 tx.executeSql('DROP TABLE IF EXISTS table_product', []);
                 tx.executeSql(
-                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price VARCHAR(30), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40), soldDate VARCHAR(40), sellingPrice VARCHAR(10) )', 
+                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price INTEGER(10), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40), soldDate VARCHAR(40), sellingPrice VARCHAR(10) )', 
                     []
                 );
             }
@@ -46,6 +46,22 @@ function saveProduct(payload){
         }
         );
     });
+}
+
+function saveDefault(){
+    db.transaction(function (tx){
+        tx.executeSql('INSERT INTO table_product (clothe, category, clotheType, color, price, size, status) VALUES (?,?,?,?,?,?,?,?) ',
+        ['Trousers', 'Gents', 'Jeans', 'Black', 1000, '36', 'IN_STOCK'],
+        (tx, results) =>{
+            console.log('Results: ', results.rowsAffected)
+            if (results.rowsAffected > 0){
+                console.log('Products updated successfully')
+            }else{
+                console.log("Products saving failed")
+            }
+        }
+        )
+    })
 }
 
 function viewAllProducts(){
@@ -88,9 +104,34 @@ function getProductByName(clothe){
     })
 }
 
+function getProducts(name, category){
+    return new Promise((resolve) =>{
+        db.transaction((tx) =>{
+            tx.executeSql('SELECT * FROM table_product WHERE clothe = ? AND category = ? ORDER BY clotheType', 
+            [name, category],
+            (tx, results) =>{
+                console.log('Length: ', results.rows.length)
+                var temp = []
+                if (results.rows.length == 0){
+                    alert('Clothe not found')
+                    return
+                }
+                for (let i = 0; i < results.rows.length; i++){
+                    temp.push(results.rows.item(i))
+                }
+                console.log(temp)
+                resolve(temp)
+            }
+            )
+        })
+    })
+}
+
 export default{
     initDB,
     saveProduct,
     viewAllProducts,
-    getProductByName
+    getProductByName,
+    saveDefault,
+    getProducts
 }
