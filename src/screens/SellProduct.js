@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, ScrollView} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, ScrollView, Modal} from 'react-native';
 import {Card, CardItem} from 'native-base';
 
 import globalStyles from '../config/globalStyles';
@@ -8,6 +8,8 @@ import DropDown from '../components/DropDown';
 import SubmitButton from '../components/SubmitButton';
 import DatabaseUtil from '../utils/DatabaseUtil';
 import TableColumn from '../components/TableColumn';
+import TableButton from '../components/TableButton';
+import FormInput from '../components/FormInput';
 
 const {width, height} = Dimensions.get('window')
 
@@ -20,11 +22,13 @@ export default function SellProductScreen({}){
 
     const [size, setSize] = useState('')
     const [color, setColor] = useState('')
-    const [price, setPrice] = useState('')
+    const [price, setPrice] = useState(0)
     const [clothe, setClothe] = useState('')
     const [clotheType, setClotheType] = useState('')
     const [clotheResult, setClotheResult] = useState([])
     const [showTable, setShowTable] = useState(false)
+    const [showPrice, setShowPrice] = useState(false)
+    const [prodId, setProdId] = useState('')
 
     const getClothes = async() =>{
         
@@ -38,24 +42,43 @@ export default function SellProductScreen({}){
     const selectClothe = async(val) =>{
         console.log(val)
         setClothe(val)
-
-        DatabaseUtil.getProductByName(val)
-        .then(resp =>{
-            console.log(resp)
-            setClotheResult(resp)
-            //setShowCategory(true)
-        })
-        
     }
 
     const selectCategory = (val) =>{
         console.log(val)
+        if (!clothe){
+            alert('Please select clothe above...')
+            return
+        }
 
-        DatabaseUtil.getProducts(clothe, val)
+        DatabaseUtil.getProductsToSell(clothe, val)
         .then(resp =>{
             setClotheResult(resp)
             setShowTable(true)
         })
+    }
+
+    const sell = (id) =>{
+        setShowPrice(true)
+        console.log("Data: ", id)
+        setProdId(id)
+    }
+
+    const clearDetails = () =>{
+        setShowPrice(false)
+        setShowTable(false)
+    }
+
+    const submit = () =>{
+        let payload = {
+            price: price,
+            status: "SOLD",
+            timestamp: new Date().toISOString(),
+            prod_id: prodId
+        }
+        console.log("Payload: ", payload)
+
+        DatabaseUtil.sellProduct(payload)
     }
 
     return(
@@ -103,6 +126,10 @@ export default function SellProductScreen({}){
                             columnStyle = {globalStyles.tableColumnSeparator}
                             textStyle = {styles.headingText}
                         />
+                        <TableColumn
+                            cText = ""
+                            columnStyle = {globalStyles.tableColumnSeparator}
+                        />
                     </CardItem>
                     {
                         clotheResult.map((item, index) =>
@@ -123,6 +150,11 @@ export default function SellProductScreen({}){
                                     cText = {item.price}
                                     columnStyle = {globalStyles.tableColumnSeparator}
                                 />
+                                <TableButton
+                                    title = "Sell"
+                                    columnStyle = {globalStyles.tableColumnSeparator}
+                                    onPress = {() => sell(item.prod_id)}
+                                />
                                 
                             </CardItem>
                         )
@@ -132,13 +164,31 @@ export default function SellProductScreen({}){
                 }
             </View>
             {
+                showPrice && (
+                    <View style = {{alignItems: 'center'}}>
+                        <FormInput
+                            labelName = "Price"
+                            value = {price}
+                            onChangeText = {(number) => setPrice(number)}
+                        />
+                        <SubmitButton
+                            buttonTitle = "Submit"
+                            onPress = {submit}
+                        />
+                    </View>
+                )
+            }
+
+            {
                 showTable && (
                     <SubmitButton
                         buttonTitle = "Clear"
-                        onPress = {() => setShowTable(false)}
+                        onPress = {clearDetails}
                     />
                 )
             }
+
+            
             
         </View>
     );
@@ -158,3 +208,5 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     }
 })
+
+// TODO: Show popup with clothe details for confirmation / cancelling
