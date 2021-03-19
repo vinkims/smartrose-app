@@ -127,11 +127,109 @@ function getProducts(name, category){
     })
 }
 
+function sellProduct(payload){
+    console.log(payload)
+    
+    let price = payload.price
+    let id = payload.prod_id
+    let status = payload.status
+    let timestamp = payload.timestamp
+    
+    db.transaction((tx ) =>{
+        tx.executeSql('UPDATE table_product set sellingPrice=?, soldDate=?, status=? WHERE prod_id=?', 
+        [price, timestamp, status, id],
+        (tx, results) =>{
+            console.log('Results', results.rowsAffected);
+            if (results.rowsAffected > 0){
+                console.log('Results updated successfully')
+            }else{
+                console.log('Update failed')
+            }
+        }
+        );
+    });
+}
+
+
+function getSoldProducts(){
+    return new Promise((resolve) =>{
+        db.transaction((tx) =>{
+            tx.executeSql('SELECT * FROM table_product WHERE status=?', 
+            ['SOLD'],
+            (tx, results) =>{
+                console.log('Length: ', results.rows.length)
+                var temp = []
+                if (results.rows.length == 0){
+                    alert('No products in stock')
+                    return
+                }
+                for (let i = 0; i < results.rows.length; i++){
+                    temp.push(results.rows.item(i))
+                }
+                resolve(temp)
+            }
+            );
+        })
+    })
+
+}
+
+function getProductsInStock(){
+    return new Promise((resolve) =>{
+        db.transaction((tx) =>{
+            tx.executeSql('SELECT * FROM table_product WHERE status=?', 
+            ['IN_STOCK'],
+            (tx, results) =>{
+                console.log('Length: ', results.rows.length)
+                var temp = []
+                if (results.rows.length == 0){
+                    alert('No products in stock')
+                    return
+                }
+                for (let i = 0; i < results.rows.length; i++){
+                    temp.push(results.rows.item(i))
+                }
+                resolve(temp)
+            }
+            );
+        })
+    })
+
+}
+
+
+function getProductsToSell(name, category){
+    return new Promise((resolve) =>{
+        db.transaction((tx) =>{
+            tx.executeSql('SELECT * FROM table_product WHERE status=? AND (clothe = ? AND category = ?)', 
+            ['IN_STOCK', name, category],
+            (tx, results) =>{
+                console.log('Length: ', results.rows.length)
+                var temp = []
+                if (results.rows.length == 0){
+                    alert('No products in stock')
+                    return
+                }
+                for (let i = 0; i < results.rows.length; i++){
+                    temp.push(results.rows.item(i))
+                }
+                resolve(temp)
+            }
+            );
+        })
+    })
+
+}
+
 export default{
     initDB,
     saveProduct,
     viewAllProducts,
     getProductByName,
     saveDefault,
-    getProducts
+    getProducts,
+    sellProduct,
+    getSoldProducts,
+    getProductsInStock,
+    getProductsToSell
 }
