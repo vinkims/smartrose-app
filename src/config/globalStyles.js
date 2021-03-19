@@ -10,7 +10,8 @@ const globalStyles = StyleSheet.create({
     },
     tableColumn:{
         flex: 1,
-        paddingHorizontal: 4
+        paddingHorizontal: 4,
+        height: 20
     },
     cardText:{
         fontSize: 10
