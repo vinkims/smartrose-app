@@ -5,20 +5,34 @@ import {Card, CardItem} from 'native-base';
 import globalStyles from '../config/globalStyles';
 import DatabaseUtil from '../utils/DatabaseUtil';
 import TableColumn from '../components/TableColumn';
+import SubmitButton from '../components/SubmitButton';
+import FormattingUtil from '../utils/FormattingUtil';
 
 const {width, height} = Dimensions.get('window');
 
 export default function ViewStockScreen(){
 
     const [clothes, setClothes] = useState([])
+    const [soldStock, setSoldStock] = useState([])
+    const [showSold, setShowSold] = useState(false)
 
     useEffect(() =>{
-        DatabaseUtil.viewAllProducts()
+        DatabaseUtil.getProductsInStock()
         .then(resp =>{
             console.log('Products: ', resp)
             setClothes(resp)
         })
     }, [])
+
+
+    const viewSold = () =>{
+        setShowSold(true)
+        DatabaseUtil.getSoldProducts()
+        .then(resp => {
+            console.log("Sold: ", resp)
+            setSoldStock(resp)
+        })
+    }
 
     return(
         <ScrollView>
@@ -91,15 +105,72 @@ export default function ViewStockScreen(){
                         
                     </Card>
                 </View>
-                {/*
-                    clothes.map((item, index) =>
-                        <View key = {index}>
-                            <Text>Name: {item.clothe}</Text>
-                            <Text>Price: {item.price}</Text>
+
+                <SubmitButton
+                    buttonTitle = "View Sold"
+                    onPress = {viewSold}
+                />
+                {
+                    showSold && (
+                        <View style = {globalStyles.tableView}>
+                            <Card>
+                                <CardItem cardBody>
+                                    <TableColumn
+                                        cText = "Name"
+                                        textStyle = {styles.headingText}
+                                    />
+                                    <TableColumn
+                                        cText = "Type"
+                                        columnStyle = {globalStyles.tableColumnSeparator}
+                                        textStyle = {styles.headingText}
+                                    />
+                                    <TableColumn
+                                        cText = "Size"
+                                        columnStyle = {globalStyles.tableColumnSeparator}
+                                        textStyle = {styles.headingText}
+                                    />
+                                    <TableColumn
+                                        cText = "Selling Price"
+                                        columnStyle =  {globalStyles.tableColumnSeparator}
+                                        textStyle = {styles.headingText}
+                                    />
+                                    <TableColumn
+                                        cText = "Date sold"
+                                        columnStyle = {globalStyles.tableColumnSeparator}
+                                        textStyle = {styles.headingText}
+                                    />
+                                </CardItem>
+                                {
+                                    soldStock.map((item, index) =>
+                                        <CardItem style = {styles.tableRow} key = {index} cardBody>
+                                            <TableColumn
+                                                cText = {item.clothe}
+                                                columnStyle = {globalStyles.tableValueColumn}
+                                            />
+                                            <TableColumn
+                                                cText = {item.clotheType}
+                                                columnStyle = {globalStyles.tableColumnSeparator}
+                                            />
+                                            <TableColumn
+                                                cText = {item.size}
+                                                columnStyle = {globalStyles.tableColumnSeparator}
+                                            />
+                                            <TableColumn
+                                                cText = {item.sellingPrice}
+                                                columnStyle = {globalStyles.tableColumnSeparator}
+                                            />
+                                            <TableColumn
+                                                cText = {FormattingUtil.formatDate(item.soldDate)}
+                                                columnStyle = {globalStyles.tableColumnSeparator}
+                                            />
+                                        </CardItem>
+                                    )
+                                }
+                            </Card>
                         </View>
-                        
                     )
-                */}
+                }
+            
             </View>
         </ScrollView>
     );
