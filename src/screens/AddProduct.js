@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Dimensions, StyleSheet, ScrollView} from 'react-native';
+import {View, Text, Dimensions, StyleSheet, ScrollView, ToastAndroid} from 'react-native';
 import DatabaseUtil from '../utils/DatabaseUtil'
 
 import DropDown from '../components/DropDown';
@@ -94,8 +94,20 @@ export default function AddProductScreen({}){
         console.log("Payload: ", payload)
 
         DatabaseUtil.saveProduct(payload)
-
+        .then(resp =>{
+            console.log("Resp: ", resp)
+            if (resp === 200){
+                setLoading(false)
+                ToastAndroid.show("Product added successfully", ToastAndroid.SHORT)
+                setSize('')
+                setColor('')
+                setPrice(0)
+            }else if (resp === 400){
+                alert("Failed to add product")
+            }
+        })
     }
+
 
 
     return(
@@ -159,5 +171,3 @@ const styles = StyleSheet.create({
         padding: 10
     }
 })
-
-//TODO: Split price to buying and selling price
