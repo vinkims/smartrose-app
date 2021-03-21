@@ -33,19 +33,23 @@ function saveProduct(payload){
     let status = payload.status
     let timestamp = payload.timestamp
 
-    db.transaction(function (tx){
-        tx.executeSql('INSERT INTO table_product (clothe, category, clotheType, color, price, size, status, timestamp) VALUES (?,?,?,?,?,?,?,?)',
-        [clothe, category, clotheType, color, price, size, status, timestamp],
-        (tx, results) =>{
-            console.log('Results', results.rowsAffected)
-            if (results.rowsAffected > 0){
-                console.log('Products updated successfully')
-            }else{
-                console.log("Products update failed")
+    return new Promise((resolve, reject) =>{
+        db.transaction(function (tx){
+            tx.executeSql('INSERT INTO table_product (clothe, category, clotheType, color, price, size, status, timestamp) VALUES (?,?,?,?,?,?,?,?)',
+            [clothe, category, clotheType, color, price, size, status, timestamp],
+            (tx, results) =>{
+                console.log('Results', results.rowsAffected)
+                if (results.rowsAffected > 0){
+                    console.log('Products updated successfully')
+                    resolve(200)
+                }else{
+                    console.log("Products update failed")
+                    reject(400)
+                }
             }
-        }
-        );
-    });
+            );
+        });
+    })
 }
 
 function saveDefault(){
