@@ -88,7 +88,7 @@ export default function AddProductScreen({}){
             size: size,
             color: color,
             price: price,
-            status: "IN_STOCK",
+            status: "IN_STOCK", 
             timestamp: new Date().toISOString()
         }
         console.log("Payload: ", payload)
@@ -97,13 +97,15 @@ export default function AddProductScreen({}){
         .then(resp =>{
             console.log("Resp: ", resp)
             if (resp === 200){
-                setLoading(false)
                 ToastAndroid.show("Product added successfully", ToastAndroid.SHORT)
                 setSize('')
                 setColor('')
                 setPrice(0)
             }else if (resp === 400){
                 alert("Failed to add product")
+                setSize('')
+                setColor('')
+                setPrice(0)
             }
         })
     }
