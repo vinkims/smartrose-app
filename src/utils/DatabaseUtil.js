@@ -21,6 +21,76 @@ function initDB(){
     });
 }
 
+/*function initializeDB(){
+    db.transaction(function (txn){
+        txn.executeSql("SELECT name from sqlite_master WHERE type='table' AND name='table_product'",
+        [],
+        function(tx, res){
+            console.log('Product: ', res.rows.length)
+            if (res.rows.length == 0){
+                tx.executeSql('DROP TABLE IF EXISTS table_product', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS table_product(id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), clotheType VARCHAR(30), category_id INTEGER, size VARCHAR(30), status_id INTEGER, color VARCHAR(20) )',
+                []);
+            }
+        }
+        );
+    });
+
+    db.transaction(function (txn){
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='category'",
+        [],
+        function(tx, res){
+            console.log('Category: ', res.rows.length)
+            if (res.rows.length == 0){
+                tx.executeSql('DROP TABLE IF EXISTS category', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS category(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20) ) ', []);
+            }
+        }
+        );
+    });
+
+    db.transaction(function (txn){
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='status'",
+        [],
+        function(tx, res){
+            console.log('Status: ', res.rows.length)
+            if (res.rows.length == 0){
+                tx.executeSql('DROP TABLE IF EXISTS status', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS status(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), description VARCHAR(255) ) ', []);
+            }
+        }
+        );
+    });
+
+    db.transaction(function (txn){
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='buying'",
+        [],
+        function(tx, res){
+            console.log('Buying: ', res.rows.length)
+            if (res.rows.length == 0){
+                tx.executeSql('DROP TABLE IF EXISTS buying', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS buying(id INTEGER PRIMARY KEY AUTOINCREMENT, buying_price INTEGER, buying_date VARCHAR(30), clothe_id INTEGER AUTOINCREMENT) ', []);
+            }
+        }
+        );
+    });
+
+    db.transaction(function (txn){
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='selling'",
+        [],
+        function (tx, res){
+            console.log('Selling: ', res.rows.length)
+            if (res.rows.length == 0){
+                tx.executeSql('DROP TABLE IF EXISTS selling', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS selling(id INTEGER PRIMARY KEY AUTOINCREMENT, selling_price INTEGER, selling_date VARCHAR(30), clothe_id INTEGER )', []);
+            }
+        }
+        );
+    });
+
+    // TODO: Insert values for category and status tables
+}*/
+
 function saveProduct(payload){
     console.log(payload)
 
@@ -51,6 +121,63 @@ function saveProduct(payload){
         });
     })
 }
+
+/*function saveClothe(payload){
+    console.log(payload)
+
+    let clothe = payload.clothe
+    let categoryId = payload.category
+    let clotheType = payload.type
+    let color = payload.color
+    let buyingPrice = payload.price
+    let size = payload.size
+    let statusId = payload.status_id
+    let buyingDate = payload.timestamp
+
+    return new Promise((resolve, reject) =>{
+        db.transaction(function (tx){
+            tx.executeSql('INSERT INTO table_product (clothe, clotheType, category_id, size, status_id, color)',
+            [clothe, clotheType, categoryId, size, statusId, color],
+            (tx, results) =>{
+                console.log('Save results: ', results.rowsAffected)
+                if (results.rowsAffected > 0){
+                    console.log('Clothes updated')
+                    resolve(200)
+                }else{
+                    console.log('Updates failed')
+                    reject(400)
+                }
+            }
+            );
+
+            tx.executeSql('INSERT INTO buying (buying_price, buying_date, clothe_id)', 
+            [buyingPrice, buyingDate],
+            (tx, results) =>{
+                console.log('Transaction: ', results.rowsAffected)
+                if (results.rowsAffected > 0){
+                    console.log('Buying updated')
+                }else{
+                    console.log('Buying update failed')
+                }
+            }
+            );
+        });
+
+        db.transaction(function (tx){
+            tx.executeSql('INSERT INTO buying (buying_price, buying_date, clothe_id)', 
+            [buyingPrice, buyingDate],
+            (tx, results) =>{
+                console.log('Transaction: ', results.rowsAffected)
+                if (results.rowsAffected > 0){
+                    console.log('Buying updated')
+                }else{
+                    console.log('Buying update failed')
+                }
+            }
+            );
+        });
+    })
+}*/
 
 function saveDefault(){
     db.transaction(function (tx){
@@ -139,19 +266,23 @@ function sellProduct(payload){
     let status = payload.status
     let timestamp = payload.timestamp
     
-    db.transaction((tx ) =>{
-        tx.executeSql('UPDATE table_product set sellingPrice=?, soldDate=?, status=? WHERE prod_id=?', 
-        [price, timestamp, status, id],
-        (tx, results) =>{
-            console.log('Results', results.rowsAffected);
-            if (results.rowsAffected > 0){
-                console.log('Results updated successfully')
-            }else{
-                console.log('Update failed')
+    return new Promise((resolve, reject) => {
+        db.transaction((tx ) =>{
+            tx.executeSql('UPDATE table_product set sellingPrice=?, soldDate=?, status=? WHERE prod_id=?', 
+            [price, timestamp, status, id],
+            (tx, results) =>{
+                console.log('Results', results.rowsAffected);
+                if (results.rowsAffected > 0){
+                    console.log('Results updated successfully')
+                    resolve(200)
+                }else{
+                    console.log('Update failed')
+                    reject(400)
+                }
             }
-        }
-        );
-    });
+            );
+        });
+    })
 }
 
 
@@ -235,5 +366,7 @@ export default{
     sellProduct,
     getSoldProducts,
     getProductsInStock,
-    getProductsToSell
+    getProductsToSell,
+    //initializeDB,
+    //saveClothe
 }
