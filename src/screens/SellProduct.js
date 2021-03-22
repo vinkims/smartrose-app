@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, ScrollView, Modal} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, ScrollView, Modal, Alert, ToastAndroid} from 'react-native';
 import {Card, CardItem} from 'native-base';
 
 import globalStyles from '../config/globalStyles';
@@ -10,15 +10,13 @@ import DatabaseUtil from '../utils/DatabaseUtil';
 import TableColumn from '../components/TableColumn';
 import TableButton from '../components/TableButton';
 import FormInput from '../components/FormInput';
+import ActionButton from '../components/ActionButton';
 
 const {width, height} = Dimensions.get('window')
 
 
-export default function SellProductScreen({}){
+export default function SellProductScreen({navigation}){
 
-    /*useEffect(() =>{
-        getClothes()
-    }, [])*/
 
     const [size, setSize] = useState('')
     const [color, setColor] = useState('')
@@ -29,6 +27,8 @@ export default function SellProductScreen({}){
     const [showTable, setShowTable] = useState(false)
     const [showPrice, setShowPrice] = useState(false)
     const [prodId, setProdId] = useState('')
+    const [showModal, setShowModal] = useState(false)
+    const [selected, setSelected] = useState({})
 
     const getClothes = async() =>{
         
@@ -58,10 +58,11 @@ export default function SellProductScreen({}){
         })
     }
 
-    const sell = (id) =>{
+    const sell = (data) =>{
         setShowPrice(true)
-        console.log("Data: ", id)
-        setProdId(id)
+        console.log("Data: ", data)
+        setProdId(data.prod_id)
+        setSelected(data)
     }
 
     const clearDetails = () =>{
@@ -79,6 +80,25 @@ export default function SellProductScreen({}){
         console.log("Payload: ", payload)
 
         DatabaseUtil.sellProduct(payload)
+        .then(resp =>{
+            if (resp === 200){
+                ToastAndroid.show("Product sold", ToastAndroid.SHORT)
+                setShowModal(false)
+                setShowTable(false)
+                setShowPrice(false)
+            }else if (resp === 400){
+                ToastAndroid.show("Product selling failed", ToastAndroid.SHORT)
+            }
+        })
+    }
+
+
+    const showInfo = () =>{
+        if (!price){
+            alert("Please enter price")
+            return
+        }
+        setShowModal(true)
     }
 
     return(
@@ -153,7 +173,7 @@ export default function SellProductScreen({}){
                                 <TableButton
                                     title = "Sell"
                                     columnStyle = {globalStyles.tableColumnSeparator}
-                                    onPress = {() => sell(item.prod_id)}
+                                    onPress = {() => sell(item)}
                                 />
                                 
                             </CardItem>
@@ -173,18 +193,45 @@ export default function SellProductScreen({}){
                         />
                         <SubmitButton
                             buttonTitle = "Submit"
-                            onPress = {submit}
+                            onPress = {showInfo}
                         />
                     </View>
                 )
             }
 
             {
-                showTable && (
-                    <SubmitButton
-                        buttonTitle = "Clear"
-                        onPress = {clearDetails}
-                    />
+                showModal && (
+                    <View style = {styles.centeredView}>
+                        <Modal
+                            animationType = "slide"
+                            transparent = {true}
+                            visible = {showModal}
+                            onRequestClose = {() =>{
+                                setShowModal(false)
+                            }}
+                        >
+                            <View style = {styles.modalView}>
+                                <Text>Confirm you're selling</Text>
+                                <Text>{selected.category + "'s " +selected.clothe}</Text>
+                                <Text>{selected.clotheType}</Text>
+                                <Text>{selected.color}</Text>
+                                <Text>{selected.size}</Text>
+                                <Text>{price}</Text>
+                                <View style = {styles.buttonsView}>
+                                    <ActionButton
+                                        buttonTitle = "Submit"
+                                        buttonColor = '#00fa9a'
+                                        onPress = {submit}
+                                    />
+                                    <ActionButton
+                                        buttonTitle = "Cancel"
+                                        buttonColor = '#ff0000'
+                                        onPress = {() => setShowModal(false)}
+                                    />
+                                </View>
+                            </View>
+                        </Modal>
+                    </View>
                 )
             }
 
@@ -206,6 +253,32 @@ const styles = StyleSheet.create({
     },
     headingText:{
         fontWeight: 'bold'
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 50
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    buttonsView:{
+        flexDirection: 'row',
+        width: width / 2,
+        justifyContent: 'space-evenly'
     }
 })
 
