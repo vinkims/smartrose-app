@@ -8,6 +8,7 @@ import SubmitButton from '../components/SubmitButton';
 import FormCompleteButton from '../components/FormCompleteButton';
 import ServerCommunication from '../utils/ServerCommunication';
 import globalStyles from '../config/globalStyles';
+import DatabaseUtil from '../utils/DatabaseUtil';
 
 export default function SignupScreen({navigation}){
 
@@ -15,6 +16,10 @@ export default function SignupScreen({navigation}){
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() =>{
+        DatabaseUtil.initializeDB()
+    }, [])
 
 
     /**

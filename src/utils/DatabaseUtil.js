@@ -12,7 +12,7 @@ function initDB(){
             if (res.rows.length == 0){
                 tx.executeSql('DROP TABLE IF EXISTS table_product', []);
                 tx.executeSql(
-                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price INTEGER(10), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40), soldDate VARCHAR(40), sellingPrice VARCHAR(10) )', 
+                    'CREATE TABLE IF NOT EXISTS table_product(prod_id INTEGER PRIMARY KEY AUTOINCREMENT, clothe VARCHAR(30), category VARCHAR(30), clotheType VARCHAR(30), color VARCHAR(30), price INTEGER(10), size VARCHAR(30), status VARCHAR(30), timestamp VARCHAR(40), soldDate VARCHAR(40), sellingPrice INTEGER(10), profit INTEGER(10) )', 
                     []
                 );
             }
@@ -21,7 +21,7 @@ function initDB(){
     });
 }
 
-/*function initializeDB(){
+function initializeDB(){
     db.transaction(function (txn){
         txn.executeSql("SELECT name from sqlite_master WHERE type='table' AND name='table_product'",
         [],
@@ -43,7 +43,7 @@ function initDB(){
             console.log('Category: ', res.rows.length)
             if (res.rows.length == 0){
                 tx.executeSql('DROP TABLE IF EXISTS category', []);
-                tx.executeSql('CREATE TABLE IF NOT EXISTS category(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20) ) ', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS category(id INTEGER PRIMARY KEY, name VARCHAR(20) ) ', []);
             }
         }
         );
@@ -56,40 +56,59 @@ function initDB(){
             console.log('Status: ', res.rows.length)
             if (res.rows.length == 0){
                 tx.executeSql('DROP TABLE IF EXISTS status', []);
-                tx.executeSql('CREATE TABLE IF NOT EXISTS status(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), description VARCHAR(255) ) ', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS status(id INTEGER PRIMARY KEY, name VARCHAR(20) )', []);
             }
         }
         );
     });
 
     db.transaction(function (txn){
-        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='buying'",
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='purchases'",
         [],
         function(tx, res){
             console.log('Buying: ', res.rows.length)
             if (res.rows.length == 0){
-                tx.executeSql('DROP TABLE IF EXISTS buying', []);
-                tx.executeSql('CREATE TABLE IF NOT EXISTS buying(id INTEGER PRIMARY KEY AUTOINCREMENT, buying_price INTEGER, buying_date VARCHAR(30), clothe_id INTEGER AUTOINCREMENT) ', []);
+                tx.executeSql('DROP TABLE IF EXISTS purchases', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS purchases(id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER, date VARCHAR(30), clothe_id INTEGER AUTOINCREMENT) ', []);
             }
         }
         );
     });
 
     db.transaction(function (txn){
-        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='selling'",
+        txn.executeSql("SELECT name FROM sqlite_master WHERE type='table' AND name='sales'",
         [],
         function (tx, res){
             console.log('Selling: ', res.rows.length)
             if (res.rows.length == 0){
-                tx.executeSql('DROP TABLE IF EXISTS selling', []);
-                tx.executeSql('CREATE TABLE IF NOT EXISTS selling(id INTEGER PRIMARY KEY AUTOINCREMENT, selling_price INTEGER, selling_date VARCHAR(30), clothe_id INTEGER )', []);
+                tx.executeSql('DROP TABLE IF EXISTS sales', []);
+                tx.executeSql('CREATE TABLE IF NOT EXISTS sales(id INTEGER PRIMARY KEY AUTOINCREMENT, amount INTEGER, date VARCHAR(30), profit INTEGER, clothe_id INTEGER )', []);
             }
         }
         );
     });
 
     // TODO: Insert values for category and status tables
-}*/
+}
+
+function saveDefaultValues(){
+    db.transaction(function (txn){
+        txn.executeSql('INSERT INTO status VALUES (?, ?) ', 
+        [1, 'IN_STOCK'],
+        [2, 'SOLD'],
+        (tx, results) =>{
+            console.log('Status: ', results.rowsAffected)
+        });
+
+        txn.executeSql('INSERT INTO category VALUES (?, ?)',
+        [1, 'Ladies'],
+        [2, 'Gents'],
+        [3, 'Kids'],
+        (tx, results) =>{
+            console.log('Categories: ', results.rowsAffected)
+        });
+    });
+}
 
 function saveProduct(payload){
     console.log(payload)
@@ -261,15 +280,17 @@ function getProducts(name, category){
 function sellProduct(payload){
     console.log(payload)
     
-    let price = payload.price
+    let sellingPrice = payload.sellingPrice
     let id = payload.prod_id
     let status = payload.status
     let timestamp = payload.timestamp
+    let buyingPrice = payload.buyingPrice
+    let profit = sellingPrice - buyingPrice
     
     return new Promise((resolve, reject) => {
         db.transaction((tx ) =>{
-            tx.executeSql('UPDATE table_product set sellingPrice=?, soldDate=?, status=? WHERE prod_id=?', 
-            [price, timestamp, status, id],
+            tx.executeSql('UPDATE table_product set sellingPrice=?, soldDate=?, status=?, profit=? WHERE prod_id=?', 
+            [sellingPrice, timestamp, status, profit, id],
             (tx, results) =>{
                 console.log('Results', results.rowsAffected);
                 if (results.rowsAffected > 0){
@@ -367,6 +388,7 @@ export default{
     getSoldProducts,
     getProductsInStock,
     getProductsToSell,
-    //initializeDB,
+    initializeDB,
+    saveDefaultValues,
     //saveClothe
 }

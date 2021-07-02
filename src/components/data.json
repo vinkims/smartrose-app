@@ -1,0 +1,36 @@
+[
+{
+    "additionalUserInfo": 
+        {
+            "isNewUser": false
+        }, 
+    "user": 
+    {
+        "displayName": null, 
+        "email": "vincekigen@gmail.com", 
+        "emailVerified": false, 
+        "isAnonymous": false, 
+        "metadata": [], 
+        "phoneNumber": null, 
+        "photoURL": null, 
+        "providerData": [], 
+        "providerId": "firebase", 
+        "uid": "HKzIfcpccVdmqKuljxO5UrzmFbA3"
+    }
+    
+},
+    [
+        {
+            "category": "Gents", 
+            "clothe": "Trousers", 
+            "clotheType": "Sweatpants", 
+            "color": "Black ", 
+            "price": "1000", 
+            "prod_id": 1, 
+            "size": "Large", 
+            "status": "IN_STOCK", 
+            "timestamp": null
+        }, 
+        {"category": "Gents", "clothe": "Trousers", "clotheType": "Sweatpants", "color": "Black ", "price": "1000", "prod_id": 2, "size": "Large", "status": "IN_STOCK", "timestamp": null}
+    ]
+]

@@ -7,6 +7,7 @@ import Loading from '../components/Loading';
 import SubmitButton from '../components/SubmitButton';
 import ServerCommunication from '../utils/ServerCommunication';
 import globalStyles from '../config/globalStyles';
+import DatabaseUtil from '../utils/DatabaseUtil';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -15,6 +16,10 @@ export default function LoginScreen({navigation}){
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() =>{
+        DatabaseUtil.initializeDB()
+    }, [])
 
 
     const login = () =>{

@@ -20,7 +20,7 @@ export default function SellProductScreen({navigation}){
 
     const [size, setSize] = useState('')
     const [color, setColor] = useState('')
-    const [price, setPrice] = useState(0)
+    const [sellingPrice, setSellingPrice] = useState(0)
     const [clothe, setClothe] = useState('')
     const [clotheType, setClotheType] = useState('')
     const [clotheResult, setClotheResult] = useState([])
@@ -29,6 +29,7 @@ export default function SellProductScreen({navigation}){
     const [prodId, setProdId] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [selected, setSelected] = useState({})
+    const [buyingPrice, setBuyingPrice] = useState(0)
 
     const getClothes = async() =>{
         
@@ -63,6 +64,7 @@ export default function SellProductScreen({navigation}){
         console.log("Data: ", data)
         setProdId(data.prod_id)
         setSelected(data)
+        setBuyingPrice(data.price)
     }
 
     const clearDetails = () =>{
@@ -72,10 +74,11 @@ export default function SellProductScreen({navigation}){
 
     const submit = () =>{
         let payload = {
-            price: price,
+            sellingPrice: sellingPrice,
             status: "SOLD",
             timestamp: new Date().toISOString(),
-            prod_id: prodId
+            prod_id: prodId,
+            buyingPrice: buyingPrice
         }
         console.log("Payload: ", payload)
 
@@ -94,7 +97,7 @@ export default function SellProductScreen({navigation}){
 
 
     const showInfo = () =>{
-        if (!price){
+        if (!sellingPrice){
             alert("Please enter price")
             return
         }
@@ -188,8 +191,8 @@ export default function SellProductScreen({navigation}){
                     <View style = {{alignItems: 'center'}}>
                         <FormInput
                             labelName = "Price"
-                            value = {price}
-                            onChangeText = {(number) => setPrice(number)}
+                            value = {sellingPrice}
+                            onChangeText = {(number) => setSellingPrice(number)}
                         />
                         <SubmitButton
                             buttonTitle = "Submit"
@@ -216,7 +219,7 @@ export default function SellProductScreen({navigation}){
                                 <Text>{selected.clotheType}</Text>
                                 <Text>{selected.color}</Text>
                                 <Text>{selected.size}</Text>
-                                <Text>{price}</Text>
+                                <Text>{sellingPrice}</Text>
                                 <View style = {styles.buttonsView}>
                                     <ActionButton
                                         buttonTitle = "Submit"

@@ -129,6 +129,11 @@ export default function ViewStockScreen(){
                             textStyle = {styles.headingText}
                         />
                         <TableColumn
+                            cText = "Profit"
+                            columnStyle = {globalStyles.tableColumnSeparator}
+                            textStyle = {styles.headingText}
+                        />
+                        <TableColumn
                             cText = "Date Sold"
                             columnStyle = {globalStyles.tableColumnSeparator}
                             textStyle = {styles.headingText}
@@ -151,6 +156,10 @@ export default function ViewStockScreen(){
                                 />
                                 <TableColumn
                                     cText = {item.sellingPrice}
+                                    columnStyle = {globalStyles.tableColumnSeparator}
+                                />
+                                <TableColumn
+                                    cText = {item.profit}
                                     columnStyle = {globalStyles.tableColumnSeparator}
                                 />
                                 <TableColumn

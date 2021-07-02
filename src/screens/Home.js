@@ -11,8 +11,16 @@ import DatabaseUtil from '../utils/DatabaseUtil';
 
 export default function HomeScreen({navigation}){
 
-    useEffect(() =>{
+    /*useEffect(() =>{
         DatabaseUtil.initDB()
+    }, [])*/
+
+    useEffect(() =>{
+        DatabaseUtil.initializeDB()
+    }, [])
+
+    useEffect(() =>{
+        DatabaseUtil.saveDefaultValues()
     }, [])
 
     const addProduct = () =>{
