@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import Config from 'react-native-config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading';
 import SubmitButton from '../components/SubmitButton';
 import ServerCommunication from '../utils/ServerCommunication';
 import globalStyles from '../config/globalStyles';
-import DatabaseUtil from '../utils/DatabaseUtil';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -17,11 +17,6 @@ export default function LoginScreen({navigation}){
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    useEffect(() =>{
-        DatabaseUtil.initializeDB()
-    }, [])
-
-
     const login = () =>{
         setLoading(true)
 
@@ -30,14 +25,7 @@ export default function LoginScreen({navigation}){
             return
         }
 
-        auth().signInWithEmailAndPassword(username.trim(), password)
-        .then(resp =>{
-            console.log(resp)
-        }).catch(error =>{
-            setLoading(false)
-            console.log('Error: ', error)
-            ServerCommunication.firebaseErrors(error)
-        })
+        checkCredentials();
     }
 
 
@@ -45,6 +33,47 @@ export default function LoginScreen({navigation}){
         navigation.reset({
             index: 0,
             routes:[{name: 'Signup'}]
+        })
+    }
+
+
+    const checkCredentials = async () =>{
+        const userDetails = {
+            userContact: username.trim(),
+            password: password.trim()
+        }
+
+        await ServerCommunication.postNoAuth(`${Config.API_URL}/user/auth`, userDetails)
+        .then(resp =>{
+            if (resp.status === 200){
+                saveToken(resp.content.token)
+                navigation.reset({
+                    index : 0,
+                    routes:[{name: 'Home'}]
+                })
+            } else if (resp.validationError.errors){
+                alert('Invalid credentials provided')
+            }
+        })
+        .catch(error =>{
+            setLoading(false)
+            console.log(error)
+            if (error.toString().includes("Network request failed")){
+                alert('Please check your internet connection')
+            }
+        })
+
+        setLoading(false);
+    }
+
+
+    /**
+     * Save token to Asyncstorage
+     */
+    const saveToken = async(token) =>{
+        await AsyncStorage.setItem("token", token)
+        .catch(error =>{
+            console.log("Error saving token ", error);
         })
     }
 
@@ -57,7 +86,7 @@ export default function LoginScreen({navigation}){
 
 
     return(
-        <View style = {globalStyles.container}>
+        <View style = {[globalStyles.container, styles.centerView]}>
             <Text>Login</Text>
             <FormInput
                 labelName = "username"
@@ -74,9 +103,9 @@ export default function LoginScreen({navigation}){
                 buttonTitle = "Login"
                 onPress = {login}
             />
-            <TouchableOpacity style = {styles.signupView} onPress = {signUp}>
+            {/*<TouchableOpacity style = {styles.signupView} onPress = {signUp}>
                 <Text style = {styles.signupText}>No account? Click to signup</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>*/}
         </View>
     )
 }
@@ -92,5 +121,10 @@ const styles = StyleSheet.create({
     },
     signupView:{
         paddingTop:20
+    },
+    centerView:{
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignContent: 'center'
     }
 })

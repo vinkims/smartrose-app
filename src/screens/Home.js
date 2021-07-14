@@ -1,26 +1,24 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Dimensions, StyleSheet} from 'react-native';
 import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import jwt_decode from 'jwt-decode';
+import Config from 'react-native-config';
 
 import SubmitButton from '../components/SubmitButton';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeButton from '../components/HomeButton';
 import ActionButton from '../components/ActionButton';
+import Loading from '../components/Loading';
 import globalStyles from '../config/globalStyles';
-import DatabaseUtil from '../utils/DatabaseUtil';
+import ServerCommunication from '../utils/ServerCommunication';
 
 export default function HomeScreen({navigation}){
 
-    /*useEffect(() =>{
-        DatabaseUtil.initDB()
-    }, [])*/
+    const [loading, setLoading] = useState(false);
 
     useEffect(() =>{
-        DatabaseUtil.initializeDB()
-    }, [])
-
-    useEffect(() =>{
-        DatabaseUtil.saveDefaultValues()
+        checkTokenValidity()
     }, [])
 
     const addProduct = () =>{
@@ -35,8 +33,62 @@ export default function HomeScreen({navigation}){
         navigation.navigate('ViewStock')
     }
 
-    const logout = () =>{
-        auth().signOut()
+    const logout = async() =>{
+        setLoading(true)
+
+        let token = await AsyncStorage.getItem("token");
+        let decoded = jwt_decode(token)
+        let userId = decoded.userId
+
+        let payload = {
+            token: token,
+            userId: userId
+        }
+
+
+        await ServerCommunication.post(`${Config.API_URL}/user/auth/sign-out`, payload)
+        .then(result =>{
+            console.log("Signout result", result)
+            if(result.status === 200){
+                console.log('Signout success')
+                removeToken()
+            } else if (result.validationError.errors){
+                console.log(result.validationError.errors)
+                removeToken()
+            }
+        })
+        .catch(error =>{
+            console.log('Failed to signout', error)
+            removeToken()
+        })
+    }
+
+    const checkTokenValidity = async() =>{
+
+        let token = await AsyncStorage.getItem("token")
+        var dateNow = new Date()
+        let decoded = jwt_decode(token)
+
+        if (decoded.exp * 1000 < dateNow.getTime()){
+            console.log("Token expired")
+            removeToken()
+        }else{
+            console.log("Valid token")
+        }
+    }
+
+    const removeToken = () =>{
+        AsyncStorage.clear()
+        .then(navigation.reset({
+            index: 0,
+            routes: [{name: 'Login'}]
+        }))
+    }
+
+    if (loading){
+        return(
+            <Loading/>
+        );
     }
 
     return(

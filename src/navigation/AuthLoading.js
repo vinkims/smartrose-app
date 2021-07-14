@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import React, {useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loading from '../components/Loading';
 
 export default function AuthLoadingScreen({navigation}){
 
@@ -13,13 +13,15 @@ export default function AuthLoadingScreen({navigation}){
      * Check if user is logged in or not
      */
     const checkUserStatus = () =>{
-        auth().onAuthStateChanged((user) =>{
-            if (user){
+
+        AsyncStorage.getItem("token")
+        .then(value =>{
+            if(value != null){
                 navigation.reset({
                     index: 0,
                     routes: [{name: 'Home'}]
                 })
-            }else{
+            }else {
                 navigation.reset({
                     index: 0,
                     routes: [{name: 'Login'}]
@@ -31,6 +33,6 @@ export default function AuthLoadingScreen({navigation}){
 
 
     return(
-        <View></View>
+        <Loading/>
     );
 }
