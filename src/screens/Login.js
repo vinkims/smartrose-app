@@ -52,6 +52,7 @@ export default function LoginScreen({navigation}){
                     routes:[{name: 'Home'}]
                 })
             } else if (resp.validationError.errors){
+                setLoading(false);
                 alert('Invalid credentials provided')
             }
         })
@@ -62,8 +63,6 @@ export default function LoginScreen({navigation}){
                 alert('Please check your internet connection')
             }
         })
-
-        setLoading(false);
     }
 
 

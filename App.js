@@ -10,12 +10,15 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 
-import LoginScreen from './src/screens/Login';
 import AuthLoadingScreen from './src/navigation/AuthLoading';
-import SignupScreen from './src/screens/Signup';
-import HomeScreen from './src/screens/Home';
 import AddProductScreen from './src/screens/AddProduct';
+import ClotheDetails from './src/screens/ClotheDetails';
+import HomeScreen from './src/screens/Home';
+import LoginScreen from './src/screens/Login';
+import SaleConfirmationScreen from './src/screens/SellConfirm';
 import SellProductScreen from './src/screens/SellProduct';
+import SignupScreen from './src/screens/Signup';
+import Transactions from './src/screens/Transactions';
 import ViewStockScreen from './src/screens/ViewStock';
 
 const Stack = createStackNavigator();
@@ -55,6 +58,18 @@ export default function App(){
                     name = 'ViewStock'
                     component = {ViewStockScreen}
                     options = {{title: 'Stock'}}
+                />
+                <Stack.Screen
+                    name = 'ClotheDetails'
+                    component = {ClotheDetails}
+                />
+                <Stack.Screen
+                    name = 'Transactions'
+                    component = {Transactions}
+                />
+                <Stack.Screen
+                    name = 'SaleConfirm'
+                    component = {SaleConfirmationScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>
