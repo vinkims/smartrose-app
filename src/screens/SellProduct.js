@@ -1,288 +1,217 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, ScrollView, Modal, Alert, ToastAndroid} from 'react-native';
+import {Dimensions, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Card, CardItem} from 'native-base';
+import Config from 'react-native-config';
 
-import globalStyles from '../config/globalStyles';
-import {values} from '../config/values';
 import DropDown from '../components/DropDown';
-import SubmitButton from '../components/SubmitButton';
-import DatabaseUtil from '../utils/DatabaseUtil';
-import TableColumn from '../components/TableColumn';
+import globalStyles from '../config/globalStyles';
+import ServerCommunication from '../utils/ServerCommunication';
 import TableButton from '../components/TableButton';
-import FormInput from '../components/FormInput';
-import ActionButton from '../components/ActionButton';
+import TableColumn from '../components/TableColumn';
 
 const {width, height} = Dimensions.get('window')
 
 
 export default function SellProductScreen({navigation}){
+  
+  const [clotheItemList, setClotheItemList] = useState([]);
+  const [clotheList, setClotheList] = useState([]);
+  const [showTable, setShowTable] = useState(false);
+  
+
+  useEffect(() => {
+    loadClothes()
+  }, [])
 
 
-    const [size, setSize] = useState('')
-    const [color, setColor] = useState('')
-    const [sellingPrice, setSellingPrice] = useState(0)
-    const [clothe, setClothe] = useState('')
-    const [clotheType, setClotheType] = useState('')
-    const [clotheResult, setClotheResult] = useState([])
-    const [showTable, setShowTable] = useState(false)
-    const [showPrice, setShowPrice] = useState(false)
-    const [prodId, setProdId] = useState('')
-    const [showModal, setShowModal] = useState(false)
-    const [selected, setSelected] = useState({})
-    const [buyingPrice, setBuyingPrice] = useState(0)
-
-    const getClothes = async() =>{
-        
-        DatabaseUtil.viewAllProducts()
-        .then(resp =>{
-            console.log("Clothes: ", resp)
-        })
-
-    }
-
-    const selectClothe = async(val) =>{
-        console.log(val)
-        setClothe(val)
-    }
-
-    const selectCategory = (val) =>{
-        console.log(val)
-        if (!clothe){
-            alert('Please select clothe above...')
-            return
-        }
-
-        DatabaseUtil.getProductsToSell(clothe, val)
-        .then(resp =>{
-            setClotheResult(resp)
-            setShowTable(true)
-        })
-    }
-
-    const sell = (data) =>{
-        setShowPrice(true)
-        console.log("Data: ", data)
-        setProdId(data.prod_id)
-        setSelected(data)
-        setBuyingPrice(data.price)
-    }
-
-    const clearDetails = () =>{
-        setShowPrice(false)
-        setShowTable(false)
-    }
-
-    const submit = () =>{
-        let payload = {
-            sellingPrice: sellingPrice,
-            status: "SOLD",
-            timestamp: new Date().toISOString(),
-            prod_id: prodId,
-            buyingPrice: buyingPrice
-        }
-        console.log("Payload: ", payload)
-
-        DatabaseUtil.sellProduct(payload)
-        .then(resp =>{
-            if (resp === 200){
-                ToastAndroid.show("Product sold", ToastAndroid.SHORT)
-                setShowModal(false)
-                setShowTable(false)
-                setShowPrice(false)
-            }else if (resp === 400){
-                ToastAndroid.show("Product selling failed", ToastAndroid.SHORT)
-            }
-        })
-    }
+  const loadClothes = async() => {
+    await ServerCommunication.get(`${Config.API_URL}/clothe`)
+    .then(resp => {
+      console.log(resp.content.data)
+      setClotheList(resp.content.data.map(i => ({
+        value: i,
+        label: i.name
+      })))
+    })
+  }
 
 
-    const showInfo = () =>{
-        if (!sellingPrice){
-            alert("Please enter price")
-            return
-        }
-        setShowModal(true)
-    }
+  const selectClothe = async(val) =>{
+    console.log(val)
+    console.log(val.id)
+    
+    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=clothe.idEQ${val.id},status.idEQ1`)
+    .then(resp => {
+      console.log(resp)
+      if (resp.status === 200 && resp.content.data.length){
+        console.log(resp.content.data)
+        setClotheItemList(resp.content.data)
+        setShowTable(true)
+      }else{
+        alert('No products matching the clothe found')
+      }
+    })
+  } 
 
-    return(
-        <View style = {globalStyles.container}>
-            <Text>Sell Product</Text>
-            <DropDown
-                placeholder = "Select clothe"
-                dropDownItems = {values.clothe}
-                onChangeItem = {item =>{
-                    selectClothe(item.value)
-                }}
+  const sell = (data) =>{
+    console.log("Data: ", data)
+    navigation.navigate('SaleConfirm', {prodId: data.id})
+  }
+
+
+  return(
+    <View style = {globalStyles.container}>
+      <Text>Sell Product</Text>
+      <DropDown
+        placeholder = "Select clothe"
+        dropDownItems = {clotheList}
+        onChangeItem = {item =>{
+          selectClothe(item.value)
+        }}
+      />  
+
+      <ScrollView style = {globalStyles.tableView}>
+        {
+        showTable && (
+      
+        <Card>
+          <CardItem cardBody>
+            <TableColumn
+              cText = "Desc"
+              textStyle = {styles.headingText}
             />
-            
-            <DropDown
-                placeholder = "Select category..."
-                dropDownItems = {values.category}
-                onChangeItem = {item =>{
-                    selectCategory(item.value)
-                }}
+            <TableColumn
+              cText = "Category"
+              columnStyle = {globalStyles.tableColumnSeparator}
+              textStyle = {styles.headingText}
             />
-             
-
-            <View style = {globalStyles.tableView}>
-                {
-                    showTable && (
-                
-                <Card>
-                    <CardItem cardBody>
-                        <TableColumn
-                            cText = "Type"
-                            textStyle = {styles.headingText}
-                        />
-                        <TableColumn
-                            cText = "Color"
-                            columnStyle = {globalStyles.tableColumnSeparator}
-                            textStyle = {styles.headingText}
-                        />
-                        <TableColumn
-                            cText = "Size"
-                            columnStyle = {globalStyles.tableColumnSeparator}
-                            textStyle = {styles.headingText}
-                        />
-                        <TableColumn
-                            cText = "Buying Price"
-                            columnStyle = {globalStyles.tableColumnSeparator}
-                            textStyle = {styles.headingText}
-                        />
-                        <TableColumn
-                            cText = ""
-                            columnStyle = {globalStyles.tableColumnSeparator}
-                        />
-                    </CardItem>
-                    {
-                        clotheResult.map((item, index) =>
-                            <CardItem style = {styles.tableRow} key = {index} cardBody>
-                                <TableColumn
-                                    cText = {item.clotheType}
-                                    columnStyle = {globalStyles.tableValueColumn}
-                                />
-                                <TableColumn
-                                    cText = {item.color}
-                                    columnStyle = {globalStyles.tableColumnSeparator}
-                                />
-                                <TableColumn
-                                    cText = {item.size}
-                                    columnStyle = {globalStyles.tableColumnSeparator}
-                                />
-                                <TableColumn
-                                    cText = {item.price}
-                                    columnStyle = {globalStyles.tableColumnSeparator}
-                                />
-                                <TableButton
-                                    title = "Sell"
-                                    columnStyle = {globalStyles.tableColumnSeparator}
-                                    onPress = {() => sell(item)}
-                                />
-                                
-                            </CardItem>
-                        )
-                    }
-            
-                </Card>)
-                }
-            </View>
-            {
-                showPrice && (
-                    <View style = {{alignItems: 'center'}}>
-                        <FormInput
-                            labelName = "Price"
-                            value = {sellingPrice}
-                            onChangeText = {(number) => setSellingPrice(number)}
-                        />
-                        <SubmitButton
-                            buttonTitle = "Submit"
-                            onPress = {showInfo}
-                        />
-                    </View>
-                )
-            }
-
-            {
-                showModal && (
-                    <View style = {styles.centeredView}>
-                        <Modal
-                            animationType = "slide"
-                            transparent = {true}
-                            visible = {showModal}
-                            onRequestClose = {() =>{
-                                setShowModal(false)
-                            }}
-                        >
-                            <View style = {styles.modalView}>
-                                <Text>Confirm you're selling</Text>
-                                <Text>{selected.category + "'s " +selected.clothe}</Text>
-                                <Text>{selected.clotheType}</Text>
-                                <Text>{selected.color}</Text>
-                                <Text>{selected.size}</Text>
-                                <Text>{sellingPrice}</Text>
-                                <View style = {styles.buttonsView}>
-                                    <ActionButton
-                                        buttonTitle = "Submit"
-                                        buttonColor = '#00fa9a'
-                                        onPress = {submit}
-                                    />
-                                    <ActionButton
-                                        buttonTitle = "Cancel"
-                                        buttonColor = '#ff0000'
-                                        onPress = {() => setShowModal(false)}
-                                    />
-                                </View>
-                            </View>
-                        </Modal>
-                    </View>
-                )
-            }
-
-            
-            
-        </View>
-    );
+            <TableColumn
+              cText = "Color"
+              columnStyle = {globalStyles.tableColumnSeparator}
+              textStyle = {styles.headingText}
+            />
+            <TableColumn
+              cText = "Size"
+              columnStyle = {globalStyles.tableColumnSeparator}
+              textStyle = {styles.headingText}
+            />
+            <TableColumn
+              cText = "Set Price"
+              columnStyle = {globalStyles.tableColumnSeparator}
+              textStyle = {styles.headingText}
+            />
+            <TableColumn
+              cText = ""
+              columnStyle = {globalStyles.tableColumnSeparator}
+            />
+          </CardItem>
+          {
+            clotheItemList.map((item, index) =>
+              <CardItem style = {styles.tableRow} key = {index} cardBody>
+                <TableColumn
+                  cText = {item.description}
+                  columnStyle = {globalStyles.tableValueColumn}
+                />
+                <TableColumn
+                  cText = {item.category}
+                  columnStyle = {globalStyles.tableColumnSeparator}
+                />
+                <TableColumn
+                  cText = {item.color}
+                  columnStyle = {globalStyles.tableColumnSeparator}
+                />
+                <TableColumn
+                  cText = {item.size}
+                  columnStyle = {globalStyles.tableColumnSeparator}
+                />
+                <TableColumn
+                  cText = {item.expectedSellingPrice}
+                  columnStyle = {globalStyles.tableColumnSeparator}
+                />
+                <TableButton
+                  title = "Sell"
+                  columnStyle = {globalStyles.tableColumnSeparator}
+                  onPress = {() => sell(item)}
+                />
+              </CardItem>
+            )
+          }
+  
+        </Card>)
+        }
+      </ScrollView>                
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    tableRow:{
-        borderTopWidth: 1,
-        borderColor: 'gray'
-    },
-    tableView:{
-        width: width,
-        position: 'relative',
-        paddingTop: 20
-    },
-    headingText:{
-        fontWeight: 'bold'
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 50
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5
-    },
-    buttonsView:{
-        flexDirection: 'row',
-        width: width / 2,
-        justifyContent: 'space-evenly'
-    }
+  categoryText:{
+    alignSelf: 'flex-start'
+  },
+  clotheItemsView:{
+    borderRadius: 5,
+    borderWidth: 0.5,
+    margin: 5,
+    padding: 5,
+    width: width / 3
+  },
+  clotheView:{
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+  },
+  descText:{
+    fontSize: 12,
+    fontWeight: 'bold'
+  },
+  sizeText:{
+    alignSelf: 'flex-end'
+  },
+  subView:{
+    flexDirection: 'row',
+    justifyContent: 'space-around'
+  },
+  scrollview:{
+    height: height / 2,
+    marginTop: 10,
+    width: width / 1.1
+  },
+  tableRow:{
+      borderTopWidth: 1,
+      borderColor: 'gray'
+  },
+  tableView:{
+      width: width,
+      position: 'relative',
+      paddingTop: 20
+  },
+  headingText:{
+      fontWeight: 'bold'
+  },
+  centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 50
+  },
+  modalView: {
+      margin: 20,
+      backgroundColor: "white",
+      borderRadius: 20,
+      padding: 35,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5
+  },
+  buttonsView:{
+      flexDirection: 'row',
+      width: width / 2,
+      justifyContent: 'space-evenly'
+  }
 })
-
-// TODO: Show popup with clothe details for confirmation / cancelling
