@@ -23,7 +23,6 @@ function firebaseErrors(err){
 
 function basicResponseHandler(url, resp){
     
-    console.log('Response', resp);
     if (resp.ok){
         return resp.json();
     } else if (resp.status === 400){
@@ -107,7 +106,7 @@ function postNoAuth(url, payload){
             const json = basicResponseHandler(url, resp)
             resolve(json)
         } catch(error){
-            console.log('Error posting to url ', error);
+            console.log(`Error posting to url: ${url} `, error);
             reject(error)
         }
     })
