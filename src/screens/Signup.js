@@ -16,6 +16,9 @@ export default function SignupScreen({navigation}){
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
+    const [mobileNumber, setMobileNumber] = useState('');
 
     useEffect(() =>{
         DatabaseUtil.initializeDB()
@@ -71,6 +74,7 @@ export default function SignupScreen({navigation}){
     return(
         <View style = {globalStyles.container}>
             <Text>Signup</Text>
+
             <FormInput
                 labelName = "username"
                 value = {username}

@@ -3,9 +3,9 @@ import {View, Text, TextInput, StyleSheet, Dimensions} from 'react-native';
 
 const {width, height} = Dimensions.get('screen');
 
-export default function FormInput({labelName, ...rest}){
+export default function FormInput({labelName, viewWidth, ...rest}){
     return(
-        <View style = {styles.formView}>
+        <View style = {[styles.formView, {width: viewWidth}]}>
             <TextInput
                 placeholder = {labelName}
                 style = {styles.textInput}

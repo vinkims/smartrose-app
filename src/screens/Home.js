@@ -33,6 +33,10 @@ export default function HomeScreen({navigation}){
         navigation.navigate('ViewStock')
     }
 
+    const viewTransactions = () =>{
+        navigation.navigate('Transactions');
+    }
+
     const logout = async() =>{
         setLoading(true)
 
@@ -113,6 +117,7 @@ export default function HomeScreen({navigation}){
                 <HomeButton
                     iconName = "file-document-outline"
                     buttonTitle = "View Transactions"
+                    onPress = {viewTransactions}
                 />
             </View>
             <ActionButton
