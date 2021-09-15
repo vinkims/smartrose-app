@@ -1,148 +1,150 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Dimensions, StyleSheet, ScrollView, ToastAndroid} from 'react-native';
-import DatabaseUtil from '../utils/DatabaseUtil'
+import {View, StyleSheet, ScrollView, Text, ToastAndroid, TouchableOpacity} from 'react-native';
+import Config from 'react-native-config';
+import {RadioButton} from 'react-native-paper';
 
 import DropDown from '../components/DropDown';
 import FormInput from '../components/FormInput';
+import Loading from '../components/Loading';
+import RadioView from '../components/RadioView';
 import SubmitButton from '../components/SubmitButton';
-import {values} from '../config/values';
 import globalStyles from '../config/globalStyles';
+import ServerCommunication from '../utils/ServerCommunication';
 
-export default function AddProductScreen({}){
+export default function AddProductScreen({navigation}){
     
     const [category, setCategory] = useState('')
     const [clothe, setClothe] = useState('')
-    const [type, setType] = useState([])
-    const [showTypeDropdown, setShowTypeDropdown] = useState(true)
-    const [subType, setSubType] = useState('')
-    const [size, setSize] = useState('') 
+    const [clotheId, setClotheId] = useState(0);
+    const [clotheList, setClotheList] = useState([]);
     const [color, setColor] = useState('')
+    const [description, setDescription] = useState('')
+    const [expectedSellingPrice, setExpectedSellingPrice] = useState(0)
+    const [loading, setLoading] = useState(false);
     const [price, setPrice] = useState(0)
+    const [size, setSize] = useState('') 
 
 
-    const selectCategory = (cat) =>{
-        console.log("Category: ",cat)
-        setCategory(cat)
+    useEffect(() => {
+        loadClothe()
+    }, [])
+
+
+    const loadClothe = async() =>{
+
+        await ServerCommunication.get(`${Config.API_URL}/clothe`)
+        .then(resp =>{
+            console.log(resp)
+            if (resp.status === 200){
+                console.log(resp.content.data)
+                setClotheList(resp.content.data.map(i => ({
+                    value: i,
+                    label: i.name
+                })))
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            alert('error loading clothe')
+        })
     }
 
 
     const selectClothe = (val) =>{
         console.log("Clothe: ", val)
-        setClothe(val)
-        displayClotheType(val)
+        setClothe(val.name);
+        setClotheId(val.id);
     }
 
-
-    const displayClotheType = (val) =>{
-        console.log("Type: ", val)
-        if (val === "Trousers"){
-            setType(values.trousers)
-            setShowTypeDropdown(true)
-        }else if (val === "Shorts"){
-            setType(values.shorts)
-            setShowTypeDropdown(true)
-        }else if (val === "Shirt"){
-            setType(values.shirt)
-            setShowTypeDropdown(true)
-        }else if (val === "Tshirt"){
-            setType(values.tshirt)
-            setShowTypeDropdown(true)
-        }else if (val === "Innerwear"){
-            setType(values.innerwear)
-            setShowTypeDropdown(true)
-        }else if (val === "Sweater"){
-            setType(values.sweater)
-            setShowTypeDropdown(true)
-        }else if (val === "Tops"){
-            setType(values.tops)
-            setShowTypeDropdown(true)
-        }else if (val === "Shoes"){
-            setType(values.shoes)
-            setShowTypeDropdown(true)
-        }else if (val === "Caps"){
-            setType(values.caps)
-            setShowTypeDropdown(true)
-        }else{
-            setType([])
-            setShowTypeDropdown(false)
-        }
+    const addMore = () =>{
+        navigation.navigate('ClotheDetails');
     }
-
-
-    const selectType = (val) =>{
-        console.log("Value: ", val)
-        setSubType(val)
-    }
-
 
     const addProduct = async() =>{
-        if (!category || !type || !color || !price){
+        if (!category || !color || !price){
             alert("Please fill in all details")
             return
         }
 
         let payload = {
+            amount: price,
             category: category,
-            clothe: clothe,
-            subType: subType,
-            size: size,
+            clotheId: clotheId,
             color: color,
-            price: price,
-            status: "IN_STOCK", 
-            timestamp: new Date().toISOString()
+            description: description,
+            expectedSellingPrice: expectedSellingPrice,
+            size: size,
         }
         console.log("Payload: ", payload)
 
-        DatabaseUtil.saveProduct(payload)
-        .then(resp =>{
-            console.log("Resp: ", resp)
-            if (resp === 200){
-                ToastAndroid.show("Product added successfully", ToastAndroid.SHORT)
-                setSize('')
+        setLoading(true);
+        await ServerCommunication.post(`${Config.API_URL}/clothe/item`, payload)
+        .then(resp => {
+            console.log(resp)
+            if (resp.status === 201){
+                setLoading(false);
+                ToastAndroid.show("Product added successfully", ToastAndroid.SHORT);
+                setCategory('')
                 setColor('')
+                setDescription('')
+                setExpectedSellingPrice(0)
                 setPrice(0)
-            }else if (resp === 400){
-                alert("Failed to add product")
                 setSize('')
-                setColor('')
-                setPrice(0)
+            } else if (resp.validationError.errors){
+                setLoading(false);
+                alert('Error saving product');
             }
+            
+        })
+        .catch(error => {
+            setLoading(false);
+            console.log(error);
+            alert('There was a problem saving product');
         })
     }
 
+
+    if (loading){
+        return(
+            <Loading/>
+        );
+    }
 
 
     return(
         <ScrollView>
         <View style = {globalStyles.container}>
             <DropDown
-                placeholder = "Select category..."
-                dropDownItems = {values.category}
-                onChangeItem = {item =>{
-                    console.log("Category chosen: ", item)
-                    selectCategory(item.value)
-                }}
-            />
-            <DropDown
-                placeholder = "Select clothe..."
-                dropDownItems = {values.clothe}
+                placeholder = "Select clothe"
+                dropDownItems = {clotheList}
                 onChangeItem = {item =>{
                     console.log("Category chosen: ", item)
                     selectClothe(item.value)
                 }}
             />
-            {
-                showTypeDropdown && (
-                    <DropDown
-                        placeholder = "Select clothe sub category..."
-                        dropDownItems = {type}
-                        onChangeItem = {item =>{
-                            console.log("Type chosen: ", item)
-                            selectType(item.value)
-                        }}
-                    />
-                )
-            }
+
+            <View style = {styles.addMoreView}>
+                <TouchableOpacity onPress = {addMore}>
+                    <Text style = {styles.addText}>Click to add more clothes</Text>
+                </TouchableOpacity>
+            </View>
+            <RadioButton.Group
+                onValueChange = {newVal => setCategory(newVal)}
+                value = {category}
+            >
+                <View style = {styles.radioButtons}>
+                    <RadioView val = "gents" text = "Gents"/>
+                    <RadioView val = "ladies" text = "Ladies"/>
+                    <RadioView val = "kids" text = "Kids"/>
+                </View>
+            </RadioButton.Group>
+
+            <FormInput
+                labelName = "Description"
+                value = {description}
+                onChangeText = {(text) => setDescription(text)}
+            />
+
             <FormInput
                 labelName = "Size"
                 value = {size}
@@ -154,9 +156,16 @@ export default function AddProductScreen({}){
                 onChangeText = {(text) => setColor(text)}
             />
             <FormInput
-                labelName = "Price"
+                labelName = "Buying Price"
                 value = {price}
                 onChangeText = {(number) => setPrice(number)}
+                keyboardType = "numeric"
+            />
+            <FormInput
+                labelName = "Expected Selling Price"
+                value = {expectedSellingPrice}
+                onChangeText = {(number) => setExpectedSellingPrice(number)}
+                keyboardType = "numeric"
             />
             <SubmitButton
                 buttonTitle = "Submit"
@@ -171,5 +180,16 @@ const styles = StyleSheet.create({
     container:{
         alignItems: 'center',
         padding: 10
+    },
+    radioButtons:{
+        flexDirection: 'row',
+        paddingTop: 10
+    },
+    addMoreView:{
+        paddingTop: 15
+    },
+    addText:{
+        fontSize: 16,
+        color: 'red'
     }
 })
