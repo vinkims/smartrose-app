@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, ScrollView, StyleSheet, ToastAndroid, View} from 'react-native';
+import {Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
 import Config from 'react-native-config';
 import {RadioButton} from 'react-native-paper';
 
@@ -9,6 +9,7 @@ import Loading from '../components/Loading';
 import RadioView from '../components/RadioView';
 import ServerCommunication from '../utils/ServerCommunication';
 import SubmitButton from '../components/SubmitButton';
+import TextDisplay from '../components/TextDisplay';
 
 const {width, height} = Dimensions.get('screen')
 
@@ -71,6 +72,7 @@ export default function SaleConfirmationScreen({route, navigation}){
       if (resp.status === 201){
         setLoading(false)
         ToastAndroid.show("Product sold successfully", ToastAndroid.SHORT)
+        navigation.goBack()
       }
     }).catch(error => {
       setLoading(false)
@@ -86,38 +88,50 @@ export default function SaleConfirmationScreen({route, navigation}){
 
 
   return(
-    <ScrollView>
+    <ScrollView style = {{paddingTop: 20}}>
       <View style = {globalStyles.container}>
-        <FormInput
-          labelName = "Clothe"
-          value = {clothe}
-        />
-        <FormInput
-          labelName = "Description"
-          value = {description}
-        />
-        <FormInput
-          labelName = "Category"
-          value = {category}
-        />
-        <FormInput
-          labelName = "Color"
-          value = {color}
-        />
-        <FormInput
-          labelName = "Size"
-          value = {size}
-        />
-        <FormInput
-          labelName = "Set price"
-          value = {JSON.stringify(expPrice)}
-        />
-        <FormInput
-          labelName = "Selling Price"
-          value = {sellingPrice}
-          onChangeText = {(number) => setSellingPrice(number)}
-          keyboardType = "numeric"
-        />
+        <View style = {styles.detailsView}>
+          <TextDisplay
+            heading = "DESC"
+            content = {description}
+          />
+          <TextDisplay
+            heading = "CLOTHE"
+            content = {clothe}
+          />
+        </View>
+
+        <View style = {styles.detailsView}>
+          <TextDisplay
+            heading = "CATEGORY"
+            content = {category}
+          />
+          <TextDisplay
+            heading = "SIZE"
+            content = {size}
+          />
+        </View>
+
+        <View style = {styles.detailsView}>
+          <TextDisplay
+            heading = "COLOR"
+            content = {color}
+          />
+          <TextDisplay
+            heading = "SET SELLING PRICE"
+            content = {expPrice}
+          />
+        </View>
+        
+        <View>
+          <Text style = {styles.priceText}>Enter selling price</Text>
+          <FormInput
+            labelName = "Selling Price"
+            value = {sellingPrice}
+            onChangeText = {(number) => setSellingPrice(number)}
+            keyboardType = "numeric"
+          />
+        </View>
 
         <RadioButton.Group
           onValueChange = {value => setPaymentChannel(value)}
@@ -140,6 +154,17 @@ export default function SaleConfirmationScreen({route, navigation}){
 }
 
 const styles = StyleSheet.create({
+  detailsView:{
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    paddingLeft: 10
+  },
+  priceText:{
+    fontSize: 12
+  },
+  priceView: {
+    marginTop: 20
+  },
   radioButtons:{
     flexDirection: 'row',
     paddingTop: 10
