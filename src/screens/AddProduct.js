@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, ScrollView, Text, ToastAndroid, TouchableOpacity} from 'react-native';
+import {Alert, Dimensions, View, StyleSheet, ScrollView, Text, ToastAndroid, TouchableOpacity} from 'react-native';
 import Config from 'react-native-config';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RadioButton} from 'react-native-paper';
 
 import DropDown from '../components/DropDown';
@@ -11,17 +12,21 @@ import SubmitButton from '../components/SubmitButton';
 import globalStyles from '../config/globalStyles';
 import ServerCommunication from '../utils/ServerCommunication';
 
+const {width, height} = Dimensions.get('screen');
+
 export default function AddProductScreen({navigation}){
     
     const [category, setCategory] = useState('')
     const [clothe, setClothe] = useState('')
     const [clotheId, setClotheId] = useState(0);
     const [clotheList, setClotheList] = useState([]);
+    const [clotheAdd, setClotheAdd] = useState('')
     const [color, setColor] = useState('')
     const [description, setDescription] = useState('')
     const [expectedSellingPrice, setExpectedSellingPrice] = useState(0)
     const [loading, setLoading] = useState(false);
     const [price, setPrice] = useState(0)
+    const [showAddClothe, setShowAddClothe] = useState(false);
     const [size, setSize] = useState('') 
 
 
@@ -31,11 +36,12 @@ export default function AddProductScreen({navigation}){
 
 
     const loadClothe = async() =>{
-
+        setLoading(true)
         await ServerCommunication.get(`${Config.API_URL}/clothe`)
         .then(resp =>{
             console.log(resp)
             if (resp.status === 200){
+                setLoading(false)
                 console.log(resp.content.data)
                 setClotheList(resp.content.data.map(i => ({
                     value: i,
@@ -44,6 +50,7 @@ export default function AddProductScreen({navigation}){
             }
         })
         .catch(error => {
+            setLoading(false)
             console.log(error);
             alert('error loading clothe')
         })
@@ -57,7 +64,7 @@ export default function AddProductScreen({navigation}){
     }
 
     const addMore = () =>{
-        navigation.navigate('ClotheDetails');
+        setShowAddClothe(true)
     }
 
     const addProduct = async() =>{
@@ -103,6 +110,35 @@ export default function AddProductScreen({navigation}){
         })
     }
 
+    const submitClothe = async() =>{
+        if (!clotheAdd){
+            alert("Please enter a name")
+            return;
+        }
+
+        let payload = {
+            name : clotheAdd
+        }
+
+        setLoading(true)
+        await ServerCommunication.post(`${Config.API_URL}/clothe`, payload)
+        .then(resp => {
+            if (resp.status === 201){
+                setLoading(false)
+                ToastAndroid.show("Clothe added successfully", ToastAndroid.LONG);
+                setClotheAdd('')
+                setShowAddClothe(false)
+            }else if (resp.validationError.errors){
+                setLoading(false)
+                Alert.alert("Error", JSON.stringify(resp.validationError.errors, null, 2))
+            }
+        }).catch(error => {
+            setLoading(false)
+            console.log(error)
+            alert("Error saving clothe")
+        })
+    }
+
 
     if (loading){
         return(
@@ -128,6 +164,23 @@ export default function AddProductScreen({navigation}){
                     <Text style = {styles.addText}>Click to add more clothes</Text>
                 </TouchableOpacity>
             </View>
+            {
+                showAddClothe && 
+                (
+                    <View style = {styles.clotheView}>
+                        <FormInput
+                            labelName = "Clothe"
+                            value = {clotheAdd}
+                            onChangeText = {(text) => setClotheAdd(text)}
+                            viewWidth = {width / 1.8}
+                        />
+                        <TouchableOpacity style = {styles.clotheAddView} onPress = {submitClothe}>
+                            <MaterialCommunityIcons name = "plus" size = {30} color = "#EE6E55" />
+                            <Text style = {styles.addText}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
+                )
+            }
             <RadioButton.Group
                 onValueChange = {newVal => setCategory(newVal)}
                 value = {category}
@@ -139,34 +192,53 @@ export default function AddProductScreen({navigation}){
                 </View>
             </RadioButton.Group>
 
-            <FormInput
-                labelName = "Description"
-                value = {description}
-                onChangeText = {(text) => setDescription(text)}
-            />
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>DESCRIPTION e.g Jeans</Text>
+                <FormInput
+                    labelName = "Description"
+                    value = {description}
+                    onChangeText = {(text) => setDescription(text)}
+                />
+            </View>
 
-            <FormInput
-                labelName = "Size"
-                value = {size}
-                onChangeText = {(text) => setSize(text)}
-            />
-            <FormInput
-                labelName = "Color"
-                value = {color}
-                onChangeText = {(text) => setColor(text)}
-            />
-            <FormInput
-                labelName = "Buying Price"
-                value = {price}
-                onChangeText = {(number) => setPrice(number)}
-                keyboardType = "numeric"
-            />
-            <FormInput
-                labelName = "Expected Selling Price"
-                value = {expectedSellingPrice}
-                onChangeText = {(number) => setExpectedSellingPrice(number)}
-                keyboardType = "numeric"
-            />
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>SIZE</Text>
+                <FormInput
+                    labelName = "Size"
+                    value = {size}
+                    onChangeText = {(text) => setSize(text)}
+                />
+            </View>
+
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>COLOR</Text>
+                <FormInput
+                    labelName = "Color"
+                    value = {color}
+                    onChangeText = {(text) => setColor(text)}
+                />
+            </View>
+
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>BUYING PRICE</Text>
+                <FormInput
+                    labelName = "Buying Price"
+                    value = {price}
+                    onChangeText = {(number) => setPrice(number)}
+                    keyboardType = "numeric"
+                />
+            </View>
+
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>EXPECTED SELLING PRICE</Text>
+                <FormInput
+                    labelName = "Expected Selling Price"
+                    value = {expectedSellingPrice}
+                    onChangeText = {(number) => setExpectedSellingPrice(number)}
+                    keyboardType = "numeric"
+                />
+            </View>
+
             <SubmitButton
                 buttonTitle = "Submit"
                 onPress = {addProduct}
@@ -177,9 +249,34 @@ export default function AddProductScreen({navigation}){
 }
 
 const styles = StyleSheet.create({
+    addText:{
+        color: '#EE6E55',
+        fontSize: 15
+    },
+    clotheAddView:{
+        alignItems: 'center',
+        borderRadius: 5,
+        borderWidth: 0.5,
+        flexDirection: 'row',
+        height: 40,
+        marginLeft: 15,
+        marginTop: 10,
+        paddingRight: 5
+    },
+    clotheView:{
+        flexDirection: 'row',
+        paddingVertical: 10
+    },
     container:{
         alignItems: 'center',
         padding: 10
+    },
+    descriptionText:{
+        fontSize: 11,
+        marginBottom: -5
+    },
+    formView:{
+        marginBottom: 10
     },
     radioButtons:{
         flexDirection: 'row',
