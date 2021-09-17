@@ -9,14 +9,15 @@ import globalStyles from '../config/globalStyles';
 import Loading from '../components/Loading';
 import ServerCommunication from '../utils/ServerCommunication';
 import TableColumn from '../components/TableColumn';
+import { values } from '../config/values';
 
 const {width, height} = Dimensions.get('screen');
 
 export default function Transactions(){
 
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState();
   const [transactions, setTransactions] = useState([]);
+  const [transactionType, setTransactionType] = useState(values.transactions);
 
 
   useEffect(() => {
@@ -35,6 +36,17 @@ export default function Transactions(){
     })
   }
 
+  const selectTransactionType = async(val) =>{
+    await ServerCommunication.get(`${Config.API_URL}/transaction?q=transactionType.idEQ${val}`)
+    .then(resp => {
+      if (resp.status === 200 && resp.content.data.length){
+        setTransactions(resp.content.data)
+      }else{
+        alert('Specified transactions not found')
+      }
+    })
+  }
+
 
   if (loading){
     return(<Loading/>);
@@ -45,9 +57,12 @@ export default function Transactions(){
     <View style = {globalStyles.container}>
       <DropDown
         placeholder = "Select transaction to view"
+        dropDownItems = {transactionType}
+        onChangeItem = {item => {
+          selectTransactionType(item.value)
+        }}
       />
       <ScrollView style = {styles.scrollview}>
-        <Text>start here</Text>
         <View style = {globalStyles.tableView}>
           <Card>
             <CardItem cardBody>

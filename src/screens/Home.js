@@ -33,6 +33,10 @@ export default function HomeScreen({navigation}){
         navigation.navigate('ViewStock')
     }
 
+    const viewSold = () => {
+        navigation.navigate('ViewSold')
+    }
+
     const viewTransactions = () =>{
         navigation.navigate('Transactions');
     }
@@ -113,6 +117,11 @@ export default function HomeScreen({navigation}){
                     iconName = "hanger"
                     buttonTitle = "View Stock"
                     onPress = {viewStock}
+                />
+                <HomeButton
+                    iconName = "cash"
+                    buttonTitle = "View Sold"
+                    onPress = {viewSold}
                 />
                 <HomeButton
                     iconName = "file-document-outline"

@@ -19,6 +19,7 @@ import SaleConfirmationScreen from './src/screens/SellConfirm';
 import SellProductScreen from './src/screens/SellProduct';
 import SignupScreen from './src/screens/Signup';
 import Transactions from './src/screens/Transactions';
+import ViewSoldScreen from './src/screens/ViewSold';
 import ViewStockScreen from './src/screens/ViewStock';
 
 const Stack = createStackNavigator();
@@ -70,6 +71,10 @@ export default function App(){
                 <Stack.Screen
                     name = 'SaleConfirm'
                     component = {SaleConfirmationScreen}
+                />
+                <Stack.Screen
+                    name = 'ViewSold'
+                    component = {ViewSoldScreen}
                 />
             </Stack.Navigator>
         </NavigationContainer>
