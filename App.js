@@ -39,6 +39,7 @@ export default function App(){
                 <Stack.Screen
                     name = 'Signup'
                     component = {SignupScreen}
+                    options = {{title: 'Add User'}}
                 />
                 <Stack.Screen
                     name = 'Home'

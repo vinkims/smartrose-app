@@ -1,12 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Dimensions, StyleSheet} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import {View, Text, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from 'jwt-decode';
 import Config from 'react-native-config';
 
-import SubmitButton from '../components/SubmitButton';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeButton from '../components/HomeButton';
 import ActionButton from '../components/ActionButton';
 import Loading from '../components/Loading';
@@ -27,6 +24,10 @@ export default function HomeScreen({navigation}){
 
     const sellProduct = () =>{
         navigation.navigate('SellProduct')
+    }
+
+    const signup = () =>{
+        navigation.navigate('Signup')
     }
 
     const viewStock = () =>{
@@ -127,6 +128,10 @@ export default function HomeScreen({navigation}){
                     iconName = "file-document-outline"
                     buttonTitle = "View Transactions"
                     onPress = {viewTransactions}
+                />
+                <HomeButton
+                    buttonTitle = "User profile"
+                    onPress = {signup}
                 />
             </View>
             <ActionButton
