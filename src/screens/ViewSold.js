@@ -94,7 +94,7 @@ export default function ViewSoldScreen({}){
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
-                  cText = {item.clotheDetails.buyingPrice + ' - ' + item.sellingPrice}
+                  cText = {item.clotheDetails.buyingPrice + '   ' + item.sellingPrice}
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
