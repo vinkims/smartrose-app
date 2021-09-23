@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {Dimensions, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {Card, CardItem} from 'native-base';
 import Config from 'react-native-config';
+import {useIsFocused} from '@react-navigation/native';
 
 import DropDown from '../components/DropDown';
 import globalStyles from '../config/globalStyles';
@@ -14,6 +15,8 @@ const {width, height} = Dimensions.get('window')
 
 export default function SellProductScreen({navigation}){
   
+  const isFocused = useIsFocused();
+
   const [clotheItemList, setClotheItemList] = useState([]);
   const [clotheList, setClotheList] = useState([]);
   const [showTable, setShowTable] = useState(false);
@@ -22,6 +25,11 @@ export default function SellProductScreen({navigation}){
   useEffect(() => {
     loadClothes()
   }, [])
+
+
+  useEffect(() => {
+    setShowTable(false)
+  }, [isFocused])
 
 
   const loadClothes = async() => {
