@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Config from 'react-native-config';
 import {RadioButton} from 'react-native-paper';
 
@@ -24,15 +25,57 @@ export default function SaleConfirmationScreen({route, navigation}){
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [expPrice, setExpPrice] = useState(0)
-  const [paymentChannel, setPaymentChannel] = useState(0)
+  const [paymentChannel, setPaymentChannel] = useState('')
+  const [reference, setReference] = useState('')
+  const [saleType, setSaleType] = useState('')
   const [sellingPrice, setSellingPrice] = useState(0)
   const [size, setSize] = useState('')
+  const [userId, setUserId] = useState(0)
 
 
   useEffect(() => {
     loadClotheItem()
   }, [])
 
+  useEffect(() => {
+    getUser()
+  }, [])
+
+
+  const addReference = () =>{
+    if (paymentChannel === '1'){
+      return(
+        <View/>
+      )
+    }else{
+      return(
+        <View>
+          <Text style = {styles.priceText}>REFERENCE</Text>
+          <FormInput
+            labelName = "Reference"
+            onChangeText = {(text) => setReference(text)}
+            value = {reference}
+          />
+        </View>
+      )
+    }
+  }
+  
+  const getUser = async() =>{
+    
+    let mobileNo = await AsyncStorage.getItem("phone")
+    console.log("Phone number", mobileNo)
+    if (mobileNo == null){
+      return
+    }
+
+    await ServerCommunication.get(`${Config.API_URL}/user/phone/${mobileNo}`)
+    .then(resp => {
+      if (resp.status === 200){
+        setUserId(resp.content.userId)
+      }
+    })
+  }
 
   const loadClotheItem = async() =>{
     await ServerCommunication.get(`${Config.API_URL}/clothe/item/${prodId}`)
@@ -53,15 +96,18 @@ export default function SaleConfirmationScreen({route, navigation}){
 
   const sellClothe = async() => {
 
-    if (!sellingPrice){
-      alert("Please enter the selling price")
+    if (!sellingPrice || !paymentChannel || !saleType){
+      alert("Please fill the all details")
       return
     }
 
     let payload = {
       amount: sellingPrice,
       clotheItemId: clotheItemId,
-      paymentChannelId: parseInt(paymentChannel)
+      paymentChannelId: parseInt(paymentChannel),
+      reference: reference,
+      saleTypeId: parseInt(saleType),
+      userId: userId
     }
     console.log("Payload: ", payload)
 
@@ -72,7 +118,7 @@ export default function SaleConfirmationScreen({route, navigation}){
       if (resp.status === 201){
         setLoading(false)
         ToastAndroid.show("Product sold successfully", ToastAndroid.SHORT)
-        navigation.goBack()
+        navigation.navigate('SellProduct')
       }
     }).catch(error => {
       setLoading(false)
@@ -122,6 +168,16 @@ export default function SaleConfirmationScreen({route, navigation}){
             content = {expPrice}
           />
         </View>
+
+        <RadioButton.Group
+          onValueChange = {val => setSaleType(val)}
+          value = {saleType}
+        >
+          <View style = {styles.radioButtons}>
+            <RadioView val = "1" text = "shop-sale" />
+            <RadioView val = "2" text = "online-order" />
+          </View>
+        </RadioButton.Group>
         
         <View>
           <Text style = {styles.priceText}>Enter selling price</Text>
@@ -143,6 +199,10 @@ export default function SaleConfirmationScreen({route, navigation}){
             <RadioView val = "3" text = "equity"/>
           </View>
         </RadioButton.Group>
+
+        {
+          addReference()
+        }
         
         <SubmitButton
           buttonTitle = "Submit"
