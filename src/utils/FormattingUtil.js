@@ -17,5 +17,15 @@ module.exports = {
         const dateObject = `${day}-${month}-${year}`
         
         return dateObject       
+    },
+
+    formatPhoneNumber(phoneNo){
+        if (phoneNo.startsWith("0")){
+            return phoneNo.replace("0", "254")
+        }else if (phoneNo.startsWith("+254")){
+            return phoneNo.replace("+254", "254")
+        }else{
+            return number
+        }
     }
 }

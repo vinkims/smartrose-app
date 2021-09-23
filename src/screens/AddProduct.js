@@ -99,7 +99,7 @@ export default function AddProductScreen({navigation}){
                 setSize('')
             } else if (resp.validationError.errors){
                 setLoading(false);
-                alert('Error saving product');
+                Alert.alert("Error", JSON.stringify(resp.validationError.errors, null, 2))
             }
             
         })

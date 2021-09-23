@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import {View, Text, ToastAndroid, ScrollView, StyleSheet} from 'react-native';
+import {Alert, View, Text, ToastAndroid, ScrollView, StyleSheet} from 'react-native';
 import Config from 'react-native-config';
 import {RadioButton} from 'react-native-paper';
 
+import FormattingUtil from '../utils/FormattingUtil';
 import FormInput from '../components/FormInput';
 import globalStyles from '../config/globalStyles';
 import Loading from '../components/Loading';
@@ -47,10 +48,12 @@ export default function SignupScreen({navigation}){
       return
     }
 
+    let validatedNo = FormattingUtil.formatPhoneNumber(phoneNumber.trim())
+
     let payload = {
       contacts : [{
         contactTypeId : 1,
-        value : phoneNumber
+        value : validatedNo
       }],
       firstName : firstName,
       lastName : lastName,
@@ -72,7 +75,7 @@ export default function SignupScreen({navigation}){
         setPhoneNumber('')
       }else if(resp.validationError.errors){
         setLoading(false)
-        alert('Error saving user')
+        Alert.alert("Error", JSON.stringify(resp.validationError.errors, null, 2))
       }
     }).catch(error => {
       setLoading(false)

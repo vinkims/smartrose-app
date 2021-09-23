@@ -1,8 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import FormattingUtil from '../utils/FormattingUtil';
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading';
 import SubmitButton from '../components/SubmitButton';
@@ -13,14 +14,14 @@ const {width, height} = Dimensions.get('screen');
 
 export default function LoginScreen({navigation}){
 
-    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [loading, setLoading] = useState(false);
 
     const login = () =>{
         setLoading(true)
 
-        if (!username || !password){
+        if (!phoneNumber || !password){
             alert('Please enter credentials')
             return
         }
@@ -28,18 +29,12 @@ export default function LoginScreen({navigation}){
         checkCredentials();
     }
 
-
-    const signUp = () =>{
-        navigation.reset({
-            index: 0,
-            routes:[{name: 'Signup'}]
-        })
-    }
-
-
     const checkCredentials = async () =>{
+
+        let validatedNo = FormattingUtil.formatPhoneNumber(phoneNumber.trim())
+
         const userDetails = {
-            userContact: username.trim(),
+            userContact: validatedNo,
             password: password.trim()
         }
 
@@ -88,9 +83,9 @@ export default function LoginScreen({navigation}){
         <View style = {[globalStyles.container, styles.centerView]}>
             <Text>Login</Text>
             <FormInput
-                labelName = "username"
-                value = {username}
-                onChangeText = {(text) => setUsername(text)}
+                labelName = "Phone number"
+                value = {phoneNumber}
+                onChangeText = {(text) => setPhoneNumber(text)}
             />
             <FormInput
                 labelName = "password"
@@ -102,18 +97,11 @@ export default function LoginScreen({navigation}){
                 buttonTitle = "Login"
                 onPress = {login}
             />
-            {/*<TouchableOpacity style = {styles.signupView} onPress = {signUp}>
-                <Text style = {styles.signupText}>No account? Click to signup</Text>
-            </TouchableOpacity>*/}
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container:{
-        alignItems: 'center',
-        padding: 10
-    },
     signupText:{
         color: 'red',
         fontSize: 16
