@@ -71,6 +71,7 @@ export default function App(){
                 <Stack.Screen
                     name = 'ViewSold'
                     component = {ViewSoldScreen}
+                    options = {{headerLeft: null}}
                 />
             </Stack.Navigator>
         </NavigationContainer>
