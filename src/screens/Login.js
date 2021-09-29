@@ -38,8 +38,6 @@ export default function LoginScreen({navigation}){
             password: password.trim()
         }
 
-        savePhoneNumber(validatedNo)
-
         await ServerCommunication.postNoAuth(`${Config.API_URL}/user/auth`, userDetails)
         .then(resp =>{
             if (resp.status === 200){
@@ -59,13 +57,6 @@ export default function LoginScreen({navigation}){
             if (error.toString().includes("Network request failed")){
                 alert('Please check your internet connection')
             }
-        })
-    }
-
-    const savePhoneNumber = async(phoneNo) => {
-        await AsyncStorage.setItem("phone", phoneNo)
-        .catch(error => {
-            console.log("Error saving phone number", error)
         })
     }
 

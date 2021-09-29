@@ -63,18 +63,12 @@ export default function SaleConfirmationScreen({route, navigation}){
   
   const getUser = async() =>{
     
-    let mobileNo = await AsyncStorage.getItem("phone")
-    console.log("Phone number", mobileNo)
-    if (mobileNo == null){
+    let id = await AsyncStorage.getItem("userId")
+    console.log("UserId", id)
+    if (userId == null){
       return
     }
-
-    await ServerCommunication.get(`${Config.API_URL}/user/phone/${mobileNo}`)
-    .then(resp => {
-      if (resp.status === 200){
-        setUserId(resp.content.userId)
-      }
-    })
+    setUserId(parseInt(id))
   }
 
   const loadClotheItem = async() =>{

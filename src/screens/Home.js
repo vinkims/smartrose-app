@@ -78,6 +78,8 @@ export default function HomeScreen({navigation}){
         var dateNow = new Date()
         let decoded = jwt_decode(token)
 
+        saveUserId(decoded.userId)
+
         if (decoded.exp * 1000 < dateNow.getTime()){
             console.log("Token expired")
             removeToken()
@@ -92,6 +94,13 @@ export default function HomeScreen({navigation}){
             index: 0,
             routes: [{name: 'Login'}]
         }))
+    }
+
+    const saveUserId = async(userId) =>{
+        await AsyncStorage.setItem("userId", JSON.stringify(userId))
+        .catch(error => {
+            console.log("Error saving userId", error)
+        })
     }
 
     if (loading){
