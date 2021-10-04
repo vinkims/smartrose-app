@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 
 import FormattingUtil from '../utils/FormattingUtil';
 import FormInput from '../components/FormInput';
@@ -81,18 +82,24 @@ export default function LoginScreen({navigation}){
 
     return(
         <View style = {[globalStyles.container, styles.centerView]}>
-            <Text>Login</Text>
-            <FormInput
-                labelName = "Phone number"
-                value = {phoneNumber}
-                onChangeText = {(text) => setPhoneNumber(text)}
-            />
-            <FormInput
-                labelName = "password"
-                value = {password}
-                secureTextEntry = {true}
-                onChangeText = {(text) => setPassword(text)}
-            />
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>PHONE NUMBER</Text>
+                <FormInput
+                    labelName = "Phone number"
+                    value = {phoneNumber}
+                    onChangeText = {(text) => setPhoneNumber(text)}
+                />
+            </View>
+
+            <View style = {styles.formView}>
+                <Text style = {styles.descriptionText}>PIN</Text>
+                <SmoothPinCodeInput
+                    password mask = "*"
+                    value = {password}
+                    onTextChange = {(code => setPassword(code))}
+                />
+            </View>
+
             <SubmitButton
                 buttonTitle = "Login"
                 onPress = {login}
@@ -112,6 +119,15 @@ const styles = StyleSheet.create({
     centerView:{
         alignItems: 'center',
         justifyContent: 'center',
-        alignContent: 'center'
+        alignContent: 'center',
+        paddingTop: 50
+    },
+    descriptionText:{
+        alignSelf: 'center',
+        fontSize: 13
+    },
+    formView:{
+        marginBottom: 10,
+        marginTop: 10
     }
 })
