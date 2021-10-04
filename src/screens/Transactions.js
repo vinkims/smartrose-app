@@ -27,7 +27,7 @@ export default function Transactions(){
 
   const loadTransactions = async() => {
     setLoading(true);
-    await ServerCommunication.get(`${Config.API_URL}/transaction`)
+    await ServerCommunication.get(`${Config.API_URL}/transaction?pgSize=1000`)
     .then(resp => {
       if (resp.status === 200){
         setLoading(false);
@@ -37,7 +37,7 @@ export default function Transactions(){
   }
 
   const selectTransactionType = async(val) =>{
-    await ServerCommunication.get(`${Config.API_URL}/transaction?q=transactionType.idEQ${val}`)
+    await ServerCommunication.get(`${Config.API_URL}/transaction?q=transactionType.idEQ${val}&pgSize=1000`)
     .then(resp => {
       if (resp.status === 200 && resp.content.data.length){
         setTransactions(resp.content.data)
@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   scrollview:{
+    height: height * 0.7,
     marginTop: 10
   },
   tableRow:{

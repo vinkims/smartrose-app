@@ -12,6 +12,7 @@ import ServerCommunication from '../utils/ServerCommunication';
 
 export default function HomeScreen({navigation}){
 
+    const [admin, setAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() =>{
@@ -77,6 +78,10 @@ export default function HomeScreen({navigation}){
         let token = await AsyncStorage.getItem("token")
         var dateNow = new Date()
         let decoded = jwt_decode(token)
+        
+        if (decoded.role === "system-admin"){
+            setAdmin(true)
+        }
 
         saveUserId(decoded.userId)
 
@@ -111,38 +116,56 @@ export default function HomeScreen({navigation}){
 
     return(
         <View style = {globalStyles.container}>
-            <Text>Home</Text>
-            <View style = {styles.buttonView}>
-                <HomeButton
-                    iconName = "briefcase-plus-outline"
-                    buttonTitle = "Add Product"
-                    onPress = {addProduct}
-                />
-                <HomeButton
-                    iconName = "briefcase-minus-outline"
-                    buttonTitle = "Sell Product"
-                    onPress = {sellProduct}
-                />
-                <HomeButton
-                    iconName = "hanger"
-                    buttonTitle = "View Stock"
-                    onPress = {viewStock}
-                />
-                <HomeButton
-                    iconName = "cash"
-                    buttonTitle = "View Sold"
-                    onPress = {viewSold}
-                />
-                <HomeButton
-                    iconName = "file-document-outline"
-                    buttonTitle = "View Transactions"
-                    onPress = {viewTransactions}
-                />
-                <HomeButton
-                    buttonTitle = "User profile"
-                    onPress = {signup}
-                />
-            </View>
+            {
+                admin ? (
+                    <View style = {styles.buttonView}>
+                        <HomeButton
+                            iconName = "briefcase-plus-outline"
+                            buttonTitle = "Add Product"
+                            onPress = {addProduct}
+                        />
+                        <HomeButton
+                            iconName = "briefcase-minus-outline"
+                            buttonTitle = "Sell Product"
+                            onPress = {sellProduct}
+                        />
+                        <HomeButton
+                            iconName = "hanger"
+                            buttonTitle = "View Stock"
+                            onPress = {viewStock}
+                        />
+                        <HomeButton
+                            iconName = "cash"
+                            buttonTitle = "View Sold"
+                            onPress = {viewSold}
+                        />
+                        <HomeButton
+                            iconName = "file-document-outline"
+                            buttonTitle = "View Transactions"
+                            onPress = {viewTransactions}
+                        />
+                    </View>
+                ) : (
+                    <View>
+                        <HomeButton
+                            iconName = "briefcase-minus-outline"
+                            buttonTitle = "Sell Product"
+                            onPress = {sellProduct}
+                        />
+                        <HomeButton
+                            iconName = "hanger"
+                            buttonTitle = "View Stock"
+                            onPress = {viewStock}
+                        />
+                        <HomeButton
+                            iconName = "cash"
+                            buttonTitle = "View Sold"
+                            onPress = {viewSold}
+                        />
+                    </View>
+                )
+            }
+
             <ActionButton
                 iconName = "logout" 
                 buttonTitle = "Logout" 
