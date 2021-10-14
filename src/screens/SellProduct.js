@@ -48,7 +48,7 @@ export default function SellProductScreen({navigation}){
     console.log(val)
     console.log(val.id)
     
-    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=clothe.idEQ${val.id},status.idEQ1`)
+    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=clothe.idEQ${val.id},status.idEQ1&pgSize=1000`)
     .then(resp => {
       console.log(resp)
       if (resp.status === 200 && resp.content.data.length){

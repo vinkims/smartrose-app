@@ -21,7 +21,7 @@ export default function ViewStockScreen(){
 
   const loadClotheItems = async() => {
     setLoading(true)
-    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=status.idEQ1`)
+    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=status.idEQ1&pgSize=1000`)
     .then(resp => {
       console.log(resp.content.data)
       if (resp.status === 200 && resp.content.data.length){
