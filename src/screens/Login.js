@@ -88,6 +88,7 @@ export default function LoginScreen({navigation}){
                     labelName = "Phone number"
                     value = {phoneNumber}
                     onChangeText = {(text) => setPhoneNumber(text)}
+                    keyboardType = "numeric"
                 />
             </View>
 
