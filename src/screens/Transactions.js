@@ -57,6 +57,7 @@ export default function Transactions(){
     <View style = {globalStyles.container}>
       <DropDown
         placeholder = "Select transaction to view"
+        wdth = {width / 1.3}
         dropDownItems = {transactionType}
         onChangeItem = {item => {
           selectTransactionType(item.value)
