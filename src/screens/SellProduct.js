@@ -72,6 +72,7 @@ export default function SellProductScreen({navigation}){
       <Text>Sell Product</Text>
       <DropDown
         placeholder = "Select clothe"
+        wdth = {width / 1.3}
         dropDownItems = {clotheList}
         onChangeItem = {item =>{
           selectClothe(item.value)

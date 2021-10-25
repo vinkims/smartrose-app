@@ -152,6 +152,7 @@ export default function AddProductScreen({navigation}){
         <View style = {globalStyles.container}>
             <DropDown
                 placeholder = "Select clothe"
+                wdth = {width / 1.3}
                 dropDownItems = {clotheList}
                 onChangeItem = {item =>{
                     console.log("Category chosen: ", item)
