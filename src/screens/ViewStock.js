@@ -23,6 +23,7 @@ export default function ViewStockScreen(){
   const [itemCount, setItemCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadFilter, setLoadFilter] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [stockValue, setStockValue] = useState(0);
 
   const reducer = (prev, curr) => prev + curr;
@@ -34,6 +35,11 @@ export default function ViewStockScreen(){
   useEffect(() => {
     loadClothes()
   }, [])
+
+  const closeFilter = () => {
+    setShowFilter(false);
+    loadClotheItems()
+  }
 
   const filterClothes = async() => {
     setLoadFilter(true)
@@ -111,9 +117,53 @@ export default function ViewStockScreen(){
     console.log(val)
     setClotheId(val.id)
   }
+
+  const selectFilter = () => {
+    setShowFilter(true)
+  }
   
   if (loading){
     return( <Loading/> );
+  }
+
+  const renderFilter = () => {
+    return(
+      <View>
+        <View style = {styles.filterView}>
+          <DropDown
+            placeholder = "Select clothe"
+            wdth = {width / 3}
+            dropDownItems = {clotheList}
+            onChangeItem = {item => {
+              selectClothe(item.value)
+            }}
+          />
+          <View style = {{width: 10}} />
+          <DropDown
+            placeholder = "Select category"
+            wdth = {width / 3}
+            dropDownItems = {category}
+            onChangeItem = {item => {
+              selectCategory(item.value)
+            }}
+          />
+          {
+            loadFilter ? (
+              <View style = {styles.filterLoad}>
+                <ActivityIndicator color = "#EE6E55" size = "small" />
+              </View>
+            ) : (
+              <TouchableOpacity style = {styles.filterButtonView} onPress = {filterClothes}>
+                <MaterialCommunityIcons name = "magnify" size = {25} color = "#EE6E55" />
+              </TouchableOpacity>
+            )
+          }
+        </View>
+        <TouchableOpacity style = {styles.filterCloseView} onPress = {closeFilter}>
+          <Text style = {styles.filterCloseText}>Close filter</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   const renderTable = () =>{
@@ -189,38 +239,12 @@ export default function ViewStockScreen(){
   return(
     <ScrollView>
       <View style = {globalStyles.container}>
-        <Text>Stock</Text>
-        <Text>Filter stock</Text>
-        <View style = {styles.filterView}>
-          <DropDown
-            placeholder = "Select clothe"
-            wdth = {width / 3}
-            dropDownItems = {clotheList}
-            onChangeItem = {item => {
-              selectClothe(item.value)
-            }}
-          />
-          <View style = {{width : 10}}/>
-          <DropDown
-            placeholder = "Select category"
-            wdth = {width / 3}
-            dropDownItems = {category}
-            onChangeItem = {item => {
-              selectCategory(item.value)
-            }}
-          />
-          {
-            loadFilter ? (
-              <View style = {styles.filterLoad}>
-                <ActivityIndicator color = "#EE6E55" size = "small" />
-              </View>
-            ) : (
-              <TouchableOpacity style = {styles.filterButtonView} onPress = {filterClothes}>
-                <MaterialCommunityIcons name = "magnify" size = {25} color = "#EE6E55" />
-              </TouchableOpacity>
-            )
-          }
-        </View>
+        <TouchableOpacity onPress = {selectFilter}>
+          <Text style = {styles.filterText}>Click to apply filter</Text>
+        </TouchableOpacity>
+        {
+          showFilter && renderFilter()
+        }
         <ScrollView style = {styles.tableScroll}>
             {renderTable()}
         </ScrollView>
@@ -249,11 +273,26 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingRight: 5
   },
+  filterCloseText: {
+    color: '#FE3E05',
+    fontSize: 14,
+    fontWeight: 'bold'
+  },
+  filterCloseView: {
+    alignItems: 'center',
+    marginBottom: 5,
+    marginTop: 3
+  },
   filterLoad: {
     alignItems: 'center',
     height: 30,
     marginLeft: 15,
     marginTop: 15
+  },
+  filterText: {
+    color: '#18E042',
+    fontSize: 14,
+    fontWeight: 'bold'
   },
   filterView:{
     flexDirection: 'row'

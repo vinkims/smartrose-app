@@ -43,6 +43,26 @@ export default function HomeScreen({navigation}){
         navigation.navigate('Transactions');
     }
 
+    const checkTokenValidity = async() =>{
+
+        let token = await AsyncStorage.getItem("token")
+        var dateNow = new Date()
+        let decoded = jwt_decode(token)
+        
+        if (decoded.role === "system-admin"){
+            setAdmin(true)
+        }
+
+        saveUserId(decoded.userId)
+
+        if (decoded.exp * 1000 < dateNow.getTime()){
+            console.log("Token expired")
+            removeToken()
+        }else{
+            console.log("Valid token")
+        }
+    }
+
     const logout = async() =>{
         setLoading(true)
 
@@ -71,26 +91,6 @@ export default function HomeScreen({navigation}){
             console.log('Failed to signout', error)
             removeToken()
         })
-    }
-
-    const checkTokenValidity = async() =>{
-
-        let token = await AsyncStorage.getItem("token")
-        var dateNow = new Date()
-        let decoded = jwt_decode(token)
-        
-        if (decoded.role === "system-admin"){
-            setAdmin(true)
-        }
-
-        saveUserId(decoded.userId)
-
-        if (decoded.exp * 1000 < dateNow.getTime()){
-            console.log("Token expired")
-            removeToken()
-        }else{
-            console.log("Valid token")
-        }
     }
 
     const removeToken = () =>{
