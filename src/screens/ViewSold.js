@@ -237,6 +237,7 @@ export default function ViewSoldScreen({}){
             )
           }
         </Card>
+        <View style = {globalStyles.tableEnd}/>
       </ScrollView>
     </View>
   );

@@ -20,6 +20,9 @@ const globalStyles = StyleSheet.create({
         borderLeftWidth: 1,
         borderColor: 'gray'
     },
+    tableEnd: {
+        paddingTop: 5
+    },
     tableValueColumn: {
         alignItems: 'flex-start'
     },

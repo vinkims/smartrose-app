@@ -79,7 +79,7 @@ export default function SellProductScreen({navigation}){
         }}
       />  
 
-      <ScrollView style = {globalStyles.tableView}>
+      <ScrollView style = {[globalStyles.tableView, styles.scrollview]}>
         {
         showTable && (
       
@@ -148,6 +148,7 @@ export default function SellProductScreen({navigation}){
   
         </Card>)
         }
+        <View style = {globalStyles.tableEnd}/>
       </ScrollView>                
     </View>
   );
@@ -181,46 +182,44 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   },
   scrollview:{
-    height: height / 2,
-    marginTop: 10,
-    width: width / 1.1
+    height: height / 1.6,
   },
   tableRow:{
-      borderTopWidth: 1,
-      borderColor: 'gray'
+    borderTopWidth: 1,
+    borderColor: 'gray'
   },
   tableView:{
-      width: width,
-      position: 'relative',
-      paddingTop: 20
+    width: width,
+    position: 'relative',
+    paddingTop: 20
   },
   headingText:{
-      fontWeight: 'bold'
+    fontWeight: 'bold'
   },
   centeredView: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 50
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50
   },
   modalView: {
-      margin: 20,
-      backgroundColor: "white",
-      borderRadius: 20,
-      padding: 35,
-      alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
   },
   buttonsView:{
-      flexDirection: 'row',
-      width: width / 2,
-      justifyContent: 'space-evenly'
+    flexDirection: 'row',
+    width: width / 2,
+    justifyContent: 'space-evenly'
   }
 })
