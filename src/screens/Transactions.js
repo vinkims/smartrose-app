@@ -129,6 +129,7 @@ export default function Transactions(){
             }
           </Card>
         </View>
+        <View style = {globalStyles.tableEnd}/>
       </ScrollView>
     </View>
   );

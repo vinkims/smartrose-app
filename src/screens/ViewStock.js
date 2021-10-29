@@ -232,6 +232,7 @@ export default function ViewStockScreen(){
             )
           }
         </Card>
+        <View style = {globalStyles.tableEnd}/>
       </View>
     );
   }
