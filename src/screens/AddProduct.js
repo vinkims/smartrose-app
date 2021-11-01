@@ -132,10 +132,31 @@ export default function AddProductScreen({navigation}){
                 setLoading(false)
                 Alert.alert("Error", JSON.stringify(resp.validationError.errors, null, 2))
             }
-        }).catch(error => {
+        })
+        .then(setTimeout(() => {
+            updateClotheList();
+        }, 300))
+        .catch(error => {
             setLoading(false)
             console.log(error)
             alert("Error saving clothe")
+        })
+    }
+
+    const updateClotheList = async() => {
+        await ServerCommunication.get(`${Config.API_URL}/clothe`)
+        .then(resp => {
+            if (resp.status === 200){
+                ToastAndroid.show("Clothe list updated", ToastAndroid.SHORT);
+                setClotheList(resp.content.data.map(i => ({
+                    value: i,
+                    label: i.name
+                })))
+            }
+        })
+        .catch(error => {
+            console.log("AddProduct.updateClotheList() error: ", error);
+            ToastAndroid.show("Error getting updated list", ToastAndroid.SHORT);
         })
     }
 

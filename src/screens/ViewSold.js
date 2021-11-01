@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     width: 25
   },
   table:{
-    height: height * 0.3,
+    height: height * 0.27,
     paddingTop: 10,
     width: width * 1.5
   },
