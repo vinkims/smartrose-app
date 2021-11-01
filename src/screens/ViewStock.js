@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity} from 'react-native';
+import {ActivityIndicator, View, Text, ScrollView, StyleSheet, Dimensions, ToastAndroid, TouchableOpacity} from 'react-native';
 import {Card, CardItem} from 'native-base';
 import Config from 'react-native-config';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -71,6 +71,11 @@ export default function ViewStockScreen(){
         setStockValue(sum);
         setItemCount(resp.content.data.length)
       }
+    })
+    .catch(error => {
+      setLoadFilter(false);
+      console.log(error);
+      ToastAndroid.show("Error applying filter. Try again", ToastAndroid.LONG);
     })
   }
 
@@ -196,7 +201,7 @@ export default function ViewStockScreen(){
               textStyle = {styles.headingText}
             />
             <TableColumn
-              cText = "BUYING PRICE"
+              cText = "BP -- SP"
               columnStyle = {globalStyles.tableColumnSeparator}
               textStyle = {styles.headingText}
             />
@@ -225,7 +230,7 @@ export default function ViewStockScreen(){
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
-                  cText = {item.amount}
+                  cText = {item.amount + '  ' + item.expectedSellingPrice}
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
               </CardItem>
@@ -310,7 +315,7 @@ const styles = StyleSheet.create({
   },
   tableScroll:{
     width: width,
-    height: height / 2.5
+    height: height / 2
   },
   summaryText: {
     fontSize: 16

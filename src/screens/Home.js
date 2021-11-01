@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, ScrollView, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from 'jwt-decode';
 import Config from 'react-native-config';
@@ -14,6 +14,7 @@ export default function HomeScreen({navigation}){
 
     const [admin, setAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState('');
 
     useEffect(() =>{
         checkTokenValidity()
@@ -54,6 +55,7 @@ export default function HomeScreen({navigation}){
         }
 
         saveUserId(decoded.userId)
+        setUser(decoded.firstName)
 
         if (decoded.exp * 1000 < dateNow.getTime()){
             console.log("Token expired")
@@ -115,7 +117,9 @@ export default function HomeScreen({navigation}){
     }
 
     return(
+        <ScrollView>
         <View style = {globalStyles.container}>
+            <Text style = {styles.welcomeText}>Welcome, {user}</Text>
             {
                 admin ? (
                     <View style = {styles.buttonView}>
@@ -173,17 +177,22 @@ export default function HomeScreen({navigation}){
                 onPress = {logout}
             />
         </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    container:{
-        alignItems: 'center',
-        padding: 10
-    },
     buttonView:{
         justifyContent: 'space-evenly',
         flexDirection: 'row',
         flexWrap: 'wrap'
+    },
+    container:{
+        alignItems: 'center',
+        padding: 10
+    },
+    welcomeText: {
+        fontSize: 16,
+        fontWeight: 'bold'
     }
 })

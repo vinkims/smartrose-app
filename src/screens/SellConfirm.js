@@ -116,8 +116,8 @@ export default function SaleConfirmationScreen({route, navigation}){
       }
     }).catch(error => {
       setLoading(false)
-      console.log(error)
-      alert("Error saving sale details")
+      console.log("SellConfirm.sellClothe() error: ", error)
+      ToastAndroid.show("Error selling item", ToastAndroid.LONG);
     })
   }
 

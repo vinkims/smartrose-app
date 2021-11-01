@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {Dimensions, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
 import {Card, CardItem} from 'native-base';
 import Config from 'react-native-config';
 import {useIsFocused} from '@react-navigation/native';
 
 import DropDown from '../components/DropDown';
 import globalStyles from '../config/globalStyles';
+import Loading from '../components/Loading';
 import ServerCommunication from '../utils/ServerCommunication';
 import TableButton from '../components/TableButton';
 import TableColumn from '../components/TableColumn';
@@ -19,6 +20,8 @@ export default function SellProductScreen({navigation}){
 
   const [clotheItemList, setClotheItemList] = useState([]);
   const [clotheList, setClotheList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadSelect, setLoadSelect] = useState(false);
   const [showTable, setShowTable] = useState(false);
   
 
@@ -33,31 +36,45 @@ export default function SellProductScreen({navigation}){
 
 
   const loadClothes = async() => {
+    setLoading(true);
     await ServerCommunication.get(`${Config.API_URL}/clothe`)
     .then(resp => {
+      setLoading(false);
       console.log(resp.content.data)
       setClotheList(resp.content.data.map(i => ({
         value: i,
         label: i.name
       })))
     })
+    .catch(error => {
+      setLoading(false);
+      console.log("SellProduct.loadClothes() error: ", error);
+      ToastAndroid.show("Error loading clothes", ToastAndroid.SHORT);
+    })
   }
 
 
   const selectClothe = async(val) =>{
-    console.log(val)
     console.log(val.id)
     
+    setLoadSelect(true);
     await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=clothe.idEQ${val.id},status.idEQ1&pgSize=1000`)
     .then(resp => {
       console.log(resp)
       if (resp.status === 200 && resp.content.data.length){
+        setLoadSelect(false);
         console.log(resp.content.data)
         setClotheItemList(resp.content.data)
         setShowTable(true)
       }else{
-        alert('No products matching the clothe found')
+        setLoadSelect(false);
+        setClotheItemList([]);
+        ToastAndroid.show("No products found", ToastAndroid.LONG);
       }
+    })
+    .catch(error => {
+      console.log("SellProduct.selectClothe() error: ", error);
+      ToastAndroid.show("Error getting selected clothes", ToastAndroid.LONG);
     })
   } 
 
@@ -66,6 +83,11 @@ export default function SellProductScreen({navigation}){
     navigation.navigate('SaleConfirm', {prodId: data.id})
   }
 
+  if (loading){
+    return(
+      <Loading/>
+    );
+  }
 
   return(
     <View style = {globalStyles.container}>
@@ -77,7 +99,10 @@ export default function SellProductScreen({navigation}){
         onChangeItem = {item =>{
           selectClothe(item.value)
         }}
-      />  
+      />
+      {
+        loadSelect && <Loading/>
+      }
 
       <ScrollView style = {[globalStyles.tableView, styles.scrollview]}>
         {
@@ -105,7 +130,7 @@ export default function SellProductScreen({navigation}){
               textStyle = {styles.headingText}
             />
             <TableColumn
-              cText = "Set Price"
+              cText = "S.P"
               columnStyle = {globalStyles.tableColumnSeparator}
               textStyle = {styles.headingText}
             />
@@ -221,5 +246,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: width / 2,
     justifyContent: 'space-evenly'
+  },
+  loadSelectView:{
+    paddingTop: 10
   }
 })
