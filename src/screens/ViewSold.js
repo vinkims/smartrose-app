@@ -62,6 +62,7 @@ export default function ViewSoldScreen({}){
         })
       }
     }).catch(error => {
+      setLoadSummary(false)
       console.log(error)
       alert("Error fetching sale details")
     })
@@ -178,12 +179,12 @@ export default function ViewSoldScreen({}){
               textStyle = {styles.headingText}
             />
             <TableColumn
-              cText = "SELLER"
+              cText = "COLOR"
               columnStyle = {globalStyles.tableColumnSeparator}
               textStyle = {styles.headingText}
             />
             <TableColumn
-              cText = "ORDER"
+              cText = "SELLER"
               columnStyle = {globalStyles.tableColumnSeparator}
               textStyle = {styles.headingText}
             />
@@ -218,11 +219,11 @@ export default function ViewSoldScreen({}){
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
-                  cText = {item.user}
+                  cText = {item.clotheDetails.color}
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
-                  cText = {item.saleType}
+                  cText = {item.user}
                   columnStyle = {globalStyles.tableColumnSeparator}
                 />
                 <TableColumn
