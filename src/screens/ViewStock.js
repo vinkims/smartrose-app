@@ -1,19 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, View, Text, ScrollView, StyleSheet, Dimensions, ToastAndroid, TouchableOpacity} from 'react-native';
-import {Card, CardItem} from 'native-base';
-import Config from 'react-native-config';
+import { ActivityIndicator, Dimensions, Image, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import DropDown from '../components/DropDown';
 import globalStyles from '../config/globalStyles';
 import Loading from '../components/Loading';
+import LoggerUtil from '../utils/LoggerUtil';
 import ServerCommunication from '../utils/ServerCommunication';
-import TableColumn from '../components/TableColumn';
-import { values } from '../config/values';
+import { colors, values } from '../config/values';
 
 const {width, height} = Dimensions.get('window');
 
-export default function ViewStockScreen(){
+export default function ViewStockScreen({navigation}){
 
   const [category, setCategory] = useState(values.categories);
   const [categoryId, setCategoryId] = useState(0);
@@ -26,19 +24,20 @@ export default function ViewStockScreen(){
   const [showFilter, setShowFilter] = useState(false);
   const [stockValue, setStockValue] = useState(0);
 
-  const reducer = (prev, curr) => prev + curr;
+  const reducer = (prev, curr) => prev + sumcurr;
 
   useEffect(() =>{
-    loadClotheItems()
+    loadClotheItems();
   }, [])
 
   useEffect(() => {
-    loadClothes()
+    loadClothes();
   }, [])
 
   const closeFilter = () => {
-    setShowFilter(false);
-    loadClotheItems()
+    setCategoryId(0);
+    setShowFilter(false);console
+    loadClotheItems();
   }
 
   const filterClothes = async() => {
@@ -60,9 +59,9 @@ export default function ViewStockScreen(){
       searchParams = `q=status.idEQ1,category.idEQ${categoryId},clothe.idEQ${clotheId}&pgSize=1000`;
     }
 
-    console.log("Search params: ", searchParams);
+    LoggerUtil.logInformation("Search params: ", searchParams);
 
-    await ServerCommunication.get(`${Config.API_URL}/clothe/item?${searchParams}`)
+    await ServerCommunication.getFilteredClotheItems(searchParams)
     .then(resp => {
       if (resp.status === 200){
         setLoadFilter(false);
@@ -74,13 +73,13 @@ export default function ViewStockScreen(){
     })
     .catch(error => {
       setLoadFilter(false);
-      console.log(error);
+      LoggerUtil.logError("ViewStock.filterClothes", error);
       ToastAndroid.show("Error applying filter. Try again", ToastAndroid.LONG);
     })
   }
 
   const loadClothes = async () => {
-    await ServerCommunication.get(`${Config.API_URL}/clothe`)
+    await ServerCommunication.getClothes()
     .then(resp => {
       if (resp.status === 200){
         setClotheList(resp.content.data.map(i => ({
@@ -90,45 +89,81 @@ export default function ViewStockScreen(){
       }
     })
     .catch(error => {
-      console.log(error)
-      alert('error loading clothe')
+      LoggerUtil.logError("ViewStock.loadClothes", error);
+      alert('error loading clothe');
     })
   }
 
   const loadClotheItems = async() => {
     setLoading(true)
-    await ServerCommunication.get(`${Config.API_URL}/clothe/item?q=status.idEQ1&pgSize=1000`)
+    await ServerCommunication.getClotheItemInStock()
     .then(resp => {
-      console.log(resp.content.data)
       if (resp.status === 200 && resp.content.data.length){
-        setClotheItemList(resp.content.data)
-        setLoading(false)
-        let sum = resp.content.data.reduce((acc, curr) => acc + curr.amount, 0)
-        setStockValue(sum)
-        setItemCount(resp.content.data.length)
+        setClotheItemList(resp.content.data);
+        setLoading(false);
+        let sum = resp.content.data.reduce((acc, curr) => acc + curr.amount, 0);
+        setStockValue(sum);
+        setItemCount(resp.content.data.length);
       }else{
-        setLoading(false)
-        alert('No products found in stock')
+        setLoading(false);
+        alert('No products found in stock');
       }
     })
   }
 
   const selectCategory = (val) => {
-    console.log(val)
-    setCategoryId(val)
+    LoggerUtil.logInformation("Category ", val);
+    setCategoryId(val);
   }
 
   const selectClothe = (val) => {
-    console.log(val)
-    setClotheId(val.id)
+    LoggerUtil.logInformation("Clothe", val);
+    setClotheId(val.id);
   }
 
   const selectFilter = () => {
-    setShowFilter(true)
+    setShowFilter(true);
+  }
+
+  const sell = (id) => {
+    LoggerUtil.logInformation("Product id: ", id);
+    navigation.navigate('SaleConfirm', {prodId: id});
   }
   
   if (loading){
     return( <Loading/> );
+  }
+
+  const renderClothes = (data) => {
+    return(
+      <View style = {styles.clotheView}>
+        <Image 
+          source = {require('../resources/images/clothes.jpg')} 
+          style = {styles.image}
+        />
+        <View style = {styles.clotheDetailView}>
+          <View style = {styles.colorView}>
+            <Text style = {styles.darkText}>{data.clotheName}</Text>
+            <Text style = {[styles.descText, styles.darkText]}>{data.description}</Text>
+            <Text style = {[styles.descText, styles.darkText]}>{data.size}</Text>
+          </View>
+          <View style = {styles.colorView}>
+            <Text>{data.color}</Text>
+            <Text style = {styles.descText}>{data.category}</Text>
+          </View>
+          <View style = {styles.colorView}>
+            <Text style = {styles.darkText}>B.P: {data.amount} </Text>
+            <Text style = {[styles.descText, styles.darkText]}>SP: {data.expectedSellingPrice}</Text>
+          </View>
+          <View style = {styles.saleView}>
+            <Text></Text>
+            <TouchableOpacity style = {styles.saleButton} onPress = {() => sell(data.id)}>
+              <Text style = {styles.saleButtonText}>SELL</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
   }
 
   const renderFilter = () => {
@@ -165,79 +200,8 @@ export default function ViewStockScreen(){
           }
         </View>
         <TouchableOpacity style = {styles.filterCloseView} onPress = {closeFilter}>
-          <Text style = {styles.filterCloseText}>Close filter</Text>
+          <Text style = {styles.filterCloseText}>Clear filter</Text>
         </TouchableOpacity>
-      </View>
-    );
-  }
-
-  const renderTable = () =>{
-    return(
-      <View style = {globalStyles.tableView}>
-        <Card>
-          <CardItem cardBody>
-            <TableColumn
-              cText = "CLOTHE"
-              textStyle = {styles.headingText}
-            />
-            <TableColumn
-              cText = "DESC"
-              columnStyle = {globalStyles.tableColumnSeparator}
-              textStyle = {styles.headingText}
-            />
-            <TableColumn
-              cText = "CATEGORY"
-              columnStyle = {globalStyles.tableColumnSeparator}
-              textStyle = {styles.headingText}
-            />
-            <TableColumn
-              cText = "COLOR"
-              columnStyle = {globalStyles.tableColumnSeparator}
-              textStyle = {styles.headingText}
-            />
-            <TableColumn
-              cText = "SIZE"
-              columnStyle = {globalStyles.tableColumnSeparator}
-              textStyle = {styles.headingText}
-            />
-            <TableColumn
-              cText = "BP -- SP"
-              columnStyle = {globalStyles.tableColumnSeparator}
-              textStyle = {styles.headingText}
-            />
-          </CardItem>
-          {
-            clotheItemList.map((item, index) =>
-              <CardItem style = {styles.tableRow} key = {index} cardBody>
-                <TableColumn
-                  cText = {item.clotheName}
-                  columnStyle = {globalStyles.tableValueColumn}
-                />
-                <TableColumn
-                  cText = {item.description}
-                  columnStyle = {globalStyles.tableColumnSeparator}
-                />
-                <TableColumn
-                  cText = {item.category}
-                  columnStyle = {globalStyles.tableColumnSeparator}
-                />
-                <TableColumn
-                  cText = {item.color}
-                  columnStyle = {globalStyles.tableColumnSeparator}
-                />
-                <TableColumn
-                  cText = {item.size}
-                  columnStyle = {globalStyles.tableColumnSeparator}
-                />
-                <TableColumn
-                  cText = {item.amount + '  ' + item.expectedSellingPrice}
-                  columnStyle = {globalStyles.tableColumnSeparator}
-                />
-              </CardItem>
-            )
-          }
-        </Card>
-        <View style = {globalStyles.tableEnd}/>
       </View>
     );
   }
@@ -251,25 +215,55 @@ export default function ViewStockScreen(){
         {
           showFilter && renderFilter()
         }
-        <ScrollView style = {styles.tableScroll}>
-            {renderTable()}
-        </ScrollView>
-      </View>
-      <View style = {styles.summaryView}>
-        <View style = {styles.summaryTextView}>
-          <Text style = {styles.summaryText}>Stock value: </Text>
-          <Text style = {styles.summaryTextNo}>{stockValue}</Text>
-        </View>
+        <View style = {styles.summaryView}>
+          <View style = {styles.summaryTextView}>
+            <Text style = {styles.summaryText}>Stock value: </Text>
+            <Text style = {styles.summaryTextNo}>{stockValue}</Text>
+          </View>
           <View style = {styles.summaryTextView}>
             <Text style = {styles.summaryText}>Item count: </Text>
             <Text style = {styles.summaryTextNo}>{itemCount}</Text>
           </View>
+        </View>
+        <ScrollView style = {styles.tableScroll}>
+          {
+            clotheItemList.map(cl => renderClothes(cl))
+          }
+        </ScrollView>
       </View>
+      
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  clotheDetailView: {
+    marginLeft: 10
+  },
+  clotheView: {
+    backgroundColor: colors.white,
+    borderColor: colors.white,
+    borderRadius: 5,
+    borderWidth: 1,
+    elevation: 5,
+    flexDirection: 'row',
+    height: 80,
+    marginLeft: 10,
+    marginTop: 10,
+    width: width / 1.1
+  },
+  colorView: {
+    flexDirection: 'row',
+    height: 20
+  },
+  darkText: {
+    color: colors.black,
+    fontWeight: 'bold'
+  },
+  descText: {
+    fontSize: 14,
+    marginLeft: 20
+  },
   filterButtonView: {
     alignItems: 'center',
     borderRadius: 5,
@@ -303,6 +297,23 @@ const styles = StyleSheet.create({
   filterView:{
     flexDirection: 'row'
   },
+  image: {
+    borderRadius: 35,
+    height: 70,
+    width: 70
+  },
+  saleButton: {
+    alignSelf: 'flex-end'
+  },
+  saleButtonText: {
+    color: colors.red
+  },
+  saleView: {
+    flexDirection: 'row',
+    height: 20,
+    justifyContent: 'space-between',
+    width: width / 1.8
+  },
   tableRow:{
     borderTopWidth: 1,
     borderColor: 'gray'
@@ -315,7 +326,7 @@ const styles = StyleSheet.create({
   },
   tableScroll:{
     width: width,
-    height: height / 2
+    height: height / 1.3
   },
   summaryText: {
     fontSize: 16
@@ -326,9 +337,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   summaryTextView: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginLeft: 10
   },
   summaryView: {
+    flexDirection: 'row',
     margin: 10
   }
 })

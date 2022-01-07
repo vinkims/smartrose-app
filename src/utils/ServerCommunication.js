@@ -139,6 +139,14 @@ export default{
   async getClothes(){
     return get(`${Config.API_URL}/clothe`)
   },
+
+  async getClotheItemInStock(){
+    return get(`${Config.API_URL}/clothe/item?q=status.idEQ1&pgSize=1000`)
+  },
+
+  async getFilteredClotheItems(params){
+    return get(`${Config.API_URL}/clothe/item?${params}`)
+  },
   
   async login(credentials){
     return postNoAuth(`${Config.API_URL}/user/auth`, credentials)
