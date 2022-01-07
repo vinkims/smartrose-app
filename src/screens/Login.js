@@ -1,134 +1,140 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import Config from 'react-native-config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
+import {Dimensions, Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 import FormattingUtil from '../utils/FormattingUtil';
-import FormInput from '../components/FormInput';
-import Loading from '../components/Loading';
-import SubmitButton from '../components/SubmitButton';
-import ServerCommunication from '../utils/ServerCommunication';
 import globalStyles from '../config/globalStyles';
+import InputText from '../components/InputText';
+import Loading from '../components/Loading';
+import LoggerUtil from '../utils/LoggerUtil';
+import NavigationService from '../services/NavigationService';
+import PinCodeInput from '../components/PinCodeInput';
+import ServerCommunication from '../utils/ServerCommunication';
+import StorageUtil from '../utils/StorageUtil';
+import SubmitButton from '../components/SubmitButton';
 
 const {width, height} = Dimensions.get('screen');
 
 export default function LoginScreen({navigation}){
 
-    const [password, setPassword] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [loading, setLoading] = useState(false);
+  const [ isMobileError, setIsMobileError ] = useState(false);
+  const [ loading, setLoading ] = useState(false);
+  const [ mobileError, setMobileError ] = useState('');
+  const [ password, setPassword ] = useState('');
+  const [ phoneNumber, setPhoneNumber ] = useState('');
+  const [ pinError, setPinError ] = useState('');
 
-    const login = () =>{
-        setLoading(true)
+  const login = async() =>{
 
-        if (!phoneNumber || !password){
-            alert('Please enter credentials')
-            return
-        }
-
-        checkCredentials();
+    if (!phoneNumber){
+      setIsMobileError(true);
+      setMobileError("Please enter mobile number");
+      return;
     }
 
-    const checkCredentials = async () =>{
-
-        let validatedNo = FormattingUtil.formatPhoneNumber(phoneNumber.trim())
-
-        const userDetails = {
-            userContact: validatedNo,
-            password: password.trim()
-        }
-
-        await ServerCommunication.postNoAuth(`${Config.API_URL}/user/auth`, userDetails)
-        .then(resp =>{
-            if (resp.status === 200){
-                saveToken(resp.content.token)
-                navigation.reset({
-                    index : 0,
-                    routes:[{name: 'Home'}]
-                })
-            } else if (resp.validationError.errors){
-                setLoading(false);
-                alert('Invalid credentials provided')
-            }
-        })
-        .catch(error =>{
-            setLoading(false)
-            console.log(error)
-            if (error.toString().includes("Network request failed")){
-                alert('Please check your internet connection')
-            }
-        })
+    if (!password){
+      setPinError("Enter PIN");
+      return;
     }
 
-
-    /**
-     * Save token to Asyncstorage
-     */
-    const saveToken = async(token) =>{
-        await AsyncStorage.setItem("token", token)
-        .catch(error =>{
-            console.log("Error saving token ", error);
-        })
+    if (password.length !== 4){
+      setPinError("Enter complete PIN");
+      return;
     }
 
-
-    if (loading){
-        return(
-            <Loading/>
-        );
+    const userDetails = {
+      userContact: FormattingUtil.formatPhoneNumber(phoneNumber),
+      password: password.trim()
     }
 
+    setLoading(true);
+    await ServerCommunication.login(userDetails)
+    .then(resp =>{
+      if (resp.status === 200){
+        LoggerUtil.logInformation("Login successful!");
+        StorageUtil.storeToken(resp.content.token);
+        NavigationService.reset("Home");
+      } else if (resp.validationError.errors){
+        setLoading(false);
+        alert('Invalid credentials provided');
+      }
+    })
+    .catch(error =>{
+      setLoading(false);
+      LoggerUtil.logError('Login.login: ', error);
+      if (error.toString().includes("Network request failed")){
+        alert('Please check your internet connection')
+      }
+    })
+  }
 
-    return(
-        <View style = {[globalStyles.container, styles.centerView]}>
-            <View style = {styles.formView}>
-                <Text style = {styles.descriptionText}>PHONE NUMBER</Text>
-                <FormInput
-                    labelName = "Phone number"
-                    value = {phoneNumber}
-                    onChangeText = {(text) => setPhoneNumber(text)}
-                    keyboardType = "numeric"
-                />
-            </View>
+  if (loading){
+    return(<Loading/>);
+  }
 
-            <View style = {styles.formView}>
-                <Text style = {styles.descriptionText}>PIN</Text>
-                <SmoothPinCodeInput
-                    password mask = "*"
-                    value = {password}
-                    onTextChange = {(code => setPassword(code))}
-                />
-            </View>
+  return(
+  <ScrollView>
+    <View style = {[globalStyles.container, styles.centerView]}>
+      <Image
+        source = {require('../resources/images/Smartrose_logo.jpeg')}
+        style = {styles.image}
+      />
+      <View style = {styles.formView}>
+        <InputText
+          error = {isMobileError}
+          errorText = {mobileError}
+          keyboardType = "numeric"
+          label = "Mobile number"
+          onFocus = {() => setIsMobileError(false)}
+          onChangeText = {(text) => setPhoneNumber(text)}
+          placeholder = "e.g 0712345678"
+          showHelper = {isMobileError}
+          value = {phoneNumber}
+          width = {width / 1.5}
+        />
+        <PinCodeInput
+          descText = "PIN"
+          errorText = {pinError}
+          onFocus = {() => setPinError('')}
+          onTextChange = {(code) => setPassword(code)}
+          password mask = "*"
+          value = {password}
+        />
+      </View>
 
-            <SubmitButton
-                buttonTitle = "Login"
-                onPress = {login}
-            />
-        </View>
-    )
+      <SubmitButton
+        buttonTitle = "Login"
+        onPress = {login}
+      />
+    </View>
+  </ScrollView>
+  )
 }
 
 const styles = StyleSheet.create({
-    signupText:{
-        color: 'red',
-        fontSize: 16
-    },
-    signupView:{
-        paddingTop:20
-    },
-    centerView:{
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignContent: 'center',
-        paddingTop: 50
-    },
-    descriptionText:{
-        alignSelf: 'center',
-        fontSize: 13
-    },
-    formView:{
-        marginBottom: 10,
-        marginTop: 10
-    }
+  signupText:{
+    color: 'red',
+    fontSize: 16
+  },
+  signupView:{
+    paddingTop:20
+  },
+  centerView:{
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    paddingTop: 50
+  },
+  descriptionText:{
+    alignSelf: 'center',
+    fontSize: 13
+  },
+  formView:{
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  image: {
+    borderRadius: width / 4.6,
+    height: width / 2.3,
+    width: width / 2.3
+  }
 })
