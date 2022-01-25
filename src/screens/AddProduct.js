@@ -1,19 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
-import Config from 'react-native-config';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RadioButton} from 'react-native-paper';
 
 import { colors } from '../config/values';
 import DropDown from '../components/DropDown';
-import FormInput from '../components/FormInput';
 import globalStyles from '../config/globalStyles';
+import InputText from '../components/InputText';
 import Loading from '../components/Loading';
 import LoggerUtil from '../utils/LoggerUtil';
 import RadioView from '../components/RadioView';
 import ServerCommunication from '../utils/ServerCommunication';
 import SubmitButton from '../components/SubmitButton';
-import InputText from '../components/InputText';
 
 const {width, height} = Dimensions.get('screen');
 

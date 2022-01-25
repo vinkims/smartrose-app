@@ -18,9 +18,21 @@ export const colors = {
 export const values = {
 
   categories: [
+    {label: 'All', value: 0},
     {label: 'Gents', value: 1},
     {label: 'Ladies', value: 2},
     {label: 'Kids', value: 3}
+  ],
+
+  paymentChannels: [
+    {label: 'cash', value: 1},
+    {label: 'm-pesa', value: 2},
+    {label: 'bank', value: 3}
+  ],
+
+  saleTypes: [
+    {label: 'shop-sale', value: 1},
+    {label: 'online', value: 2},
   ],
 
   transactions: [

@@ -13,22 +13,25 @@ const {width, height} = Dimensions.get('window');
 
 export default function ViewStockScreen({navigation}){
 
-  const [category, setCategory] = useState(values.categories);
-  const [categoryId, setCategoryId] = useState(0);
-  const [clotheId, setClotheId] = useState(0);
-  const [clotheList, setClotheList] = useState([]);
-  const [clotheItemList, setClotheItemList] = useState([]);
-  const [itemCount, setItemCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [loadFilter, setLoadFilter] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
-  const [stockValue, setStockValue] = useState(0);
+  const [ category, setCategory ] = useState(values.categories);
+  const [ categoryId, setCategoryId ] = useState(0);
+  const [ clotheId, setClotheId ] = useState(0);
+  const [ clotheList, setClotheList ] = useState([]);
+  const [ clotheItemList, setClotheItemList ] = useState([]);
+  const [ itemCount, setItemCount ] = useState(0);
+  const [ loading, setLoading ] = useState(false);
+  const [ loadFilter, setLoadFilter ] = useState(false);
+  const [ showFilter, setShowFilter ] = useState(false);
+  const [ stockValue, setStockValue ] = useState(0);
 
   const reducer = (prev, curr) => prev + sumcurr;
 
   useEffect(() =>{
-    loadClotheItems();
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadClotheItems();
+    })
+    return unsubscribe;
+  }, [navigation])
 
   useEffect(() => {
     loadClothes();
@@ -95,7 +98,7 @@ export default function ViewStockScreen({navigation}){
   }
 
   const loadClotheItems = async() => {
-    setLoading(true)
+    setLoading(true);
     await ServerCommunication.getClotheItemInStock()
     .then(resp => {
       if (resp.status === 200 && resp.content.data.length){
@@ -136,33 +139,25 @@ export default function ViewStockScreen({navigation}){
 
   const renderClothes = (data) => {
     return(
-      <View style = {styles.clotheView}>
+      <TouchableOpacity style = {styles.clotheView} onPress = {() => sell(data.id)}>
         <Image 
           source = {require('../resources/images/clothes.jpg')} 
           style = {styles.image}
         />
-        <View style = {styles.clotheDetailView}>
-          <View style = {styles.colorView}>
-            <Text style = {styles.darkText}>{data.clotheName}</Text>
-            <Text style = {[styles.descText, styles.darkText]}>{data.description}</Text>
-            <Text style = {[styles.descText, styles.darkText]}>{data.size}</Text>
-          </View>
-          <View style = {styles.colorView}>
-            <Text>{data.color}</Text>
-            <Text style = {styles.descText}>{data.category}</Text>
-          </View>
-          <View style = {styles.colorView}>
-            <Text style = {styles.darkText}>B.P: {data.amount} </Text>
-            <Text style = {[styles.descText, styles.darkText]}>SP: {data.expectedSellingPrice}</Text>
-          </View>
-          <View style = {styles.saleView}>
-            <Text></Text>
-            <TouchableOpacity style = {styles.saleButton} onPress = {() => sell(data.id)}>
-              <Text style = {styles.saleButtonText}>SELL</Text>
-            </TouchableOpacity>
-          </View>
+        <View style = {styles.colorView}>
+          <Text style = {styles.nameText}>{data.clotheName}</Text>
+          <Text style = {styles.nameDescText}> {data.description}</Text>
         </View>
-      </View>
+        <View style = {styles.colorView}>
+          <Text style = {styles.descText}>{data.color}</Text>
+          <Text style = {styles.darkText}>   {data.size}</Text>
+          <Text style = {styles.descText}>   {data.category}</Text>
+        </View>
+        <View style = {styles.colorView}>
+          <Text style = {styles.descText}>{data.amount} -</Text>
+          <Text style = {styles.darkText}> {data.expectedSellingPrice}</Text>
+        </View>
+      </TouchableOpacity>
     );
   }
 
@@ -225,10 +220,12 @@ export default function ViewStockScreen({navigation}){
             <Text style = {styles.summaryTextNo}>{itemCount}</Text>
           </View>
         </View>
-        <ScrollView style = {styles.tableScroll}>
+        <ScrollView>
+          <View style = {styles.tableScroll}>
           {
             clotheItemList.map(cl => renderClothes(cl))
           }
+          </View>
         </ScrollView>
       </View>
       
@@ -241,16 +238,16 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   clotheView: {
+    alignItems: 'center',
     backgroundColor: colors.white,
     borderColor: colors.white,
     borderRadius: 5,
     borderWidth: 1,
     elevation: 5,
-    flexDirection: 'row',
-    height: 80,
-    marginLeft: 10,
+    height: 200,
     marginTop: 10,
-    width: width / 1.1
+    padding: 10,
+    width: width / 2.3
   },
   colorView: {
     flexDirection: 'row',
@@ -258,11 +255,11 @@ const styles = StyleSheet.create({
   },
   darkText: {
     color: colors.black,
+    fontSize: 12,
     fontWeight: 'bold'
   },
   descText: {
-    fontSize: 14,
-    marginLeft: 20
+    fontSize: 12
   },
   filterButtonView: {
     alignItems: 'center',
@@ -298,9 +295,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row'
   },
   image: {
-    borderRadius: 35,
-    height: 70,
-    width: 70
+    height: width / 3.2,
+    width: width / 3.2
   },
   saleButton: {
     alignSelf: 'flex-end'
@@ -324,9 +320,20 @@ const styles = StyleSheet.create({
   headingText:{
     fontWeight: 'bold'
   },
+  nameDescText: {
+    alignSelf: 'center',
+    fontSize: 10
+  },
+  nameText: {
+    alignSelf: 'center',
+    fontSize: 12
+  },
   tableScroll:{
-    width: width,
-    height: height / 1.3
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    marginBottom: 10,
+    width: width
   },
   summaryText: {
     fontSize: 16
