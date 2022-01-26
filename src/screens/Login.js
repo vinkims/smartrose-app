@@ -52,7 +52,7 @@ export default function LoginScreen({navigation}){
       if (resp.status === 200){
         LoggerUtil.logInformation("Login successful!");
         StorageUtil.storeToken(resp.content.token);
-        NavigationService.reset("Home");
+        NavigationService.reset("Main");
       } else if (resp.validationError.errors){
         setLoading(false);
         alert('Invalid credentials provided');

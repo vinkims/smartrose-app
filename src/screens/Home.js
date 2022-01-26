@@ -97,27 +97,27 @@ export default function HomeScreen({navigation}){
               <HomeButton
                 iconName = "briefcase-plus-outline"
                 buttonTitle = "Add Product"
-                onPress = {() => navigateToScreen('AddProduct')}
+                //onPress = {() => navigateToScreen('AddProduct')}
               />
               <HomeButton
                 iconName = "briefcase-minus-outline"
                 buttonTitle = "Sell Product"
-                onPress = {() => navigateToScreen('SellProduct')}
+                //onPress = {() => navigateToScreen('SellProduct')}
               />
               <HomeButton
                 iconName = "hanger"
                 buttonTitle = "View Stock"
-                onPress = {() => navigateToScreen('ViewStock')}
+                //onPress = {() => navigateToScreen('ViewStock')}
               />
               <HomeButton
                 iconName = "cash"
                 buttonTitle = "View Sold"
-                onPress = {() => navigateToScreen('ViewSold')}
+                //onPress = {() => navigateToScreen('ViewSold')}
               />
               <HomeButton
                 iconName = "file-document-outline"
                 buttonTitle = "View Transactions"
-                onPress = {() => navigateToScreen('Transactions')}
+                //onPress = {() => navigateToScreen('Transactions')}
               />
             </View>
           ) : (
@@ -125,17 +125,17 @@ export default function HomeScreen({navigation}){
               <HomeButton
                 iconName = "briefcase-minus-outline"
                 buttonTitle = "Sell Product"
-                onPress = {() => navigateToScreen('SellProduct')}
+                //onPress = {() => navigateToScreen('SellProduct')}
               />
               <HomeButton
                 iconName = "hanger"
                 buttonTitle = "View Stock"
-                onPress = {() => navigateToScreen('ViewStock')}
+                //onPress = {() => navigateToScreen('ViewStock')}
               />
               <HomeButton
                 iconName = "cash"
                 buttonTitle = "View Sold"
-                onPress = {() => navigateToScreen('ViewSold')}
+                //onPress = {() => navigateToScreen('ViewSold')}
               />
             </View>
           )

@@ -135,17 +135,25 @@ export default{
   async addClotheItem(payload){
     return post(`${Config.API_URL}/clothe/item`, payload)
   },
-  
-  async getClothes(){
-    return get(`${Config.API_URL}/clothe`)
-  },
 
   async getClotheItemInStock(){
     return get(`${Config.API_URL}/clothe/item?q=status.idEQ1&pgSize=1000`)
   },
 
+  async getClothes(){
+    return get(`${Config.API_URL}/clothe`)
+  },
+
   async getFilteredClotheItems(params){
     return get(`${Config.API_URL}/clothe/item?${params}`)
+  },
+
+  async getSaleSummary(param){
+    return get(`${Config.API_URL}/sale/summary${param}`)
+  },
+
+  async getSoldClothes(){
+    return get(`${Config.API_URL}/sale?pgSize=1000`)
   },
   
   async login(credentials){
