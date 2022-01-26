@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { colors } from '../config/values';
 import AddProductScreen from '../screens/AddProduct';
+import DrawerMenu from '../components/DrawerMenu';
 import HomeScreen from '../screens/Home';
 import ViewSoldScreen from '../screens/ViewSold';
 import ViewStockScreen from '../screens/ViewStock';
@@ -13,6 +14,9 @@ const Drawer = createDrawerNavigator();
 const DrawerNavigator = () => {
   return(
     <Drawer.Navigator
+      drawerContent={(props) => {
+        return(<DrawerMenu {...props} />)
+      }}
       screenOptions = {{
         drawerActiveTintColor: colors.blueBackground,
         drawerInactiveTintColor: colors.iconGrey
