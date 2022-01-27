@@ -91,62 +91,6 @@ export default function HomeScreen({navigation}){
     <ScrollView>
       <View style = {globalStyles.container}>
         <Text style = {styles.welcomeText}>Welcome, {user}</Text>
-        {
-          admin ? (
-            <View style = {styles.buttonView}>
-              <HomeButton
-                iconName = "briefcase-plus-outline"
-                buttonTitle = "Add Product"
-                //onPress = {() => navigateToScreen('AddProduct')}
-              />
-              <HomeButton
-                iconName = "briefcase-minus-outline"
-                buttonTitle = "Sell Product"
-                //onPress = {() => navigateToScreen('SellProduct')}
-              />
-              <HomeButton
-                iconName = "hanger"
-                buttonTitle = "View Stock"
-                //onPress = {() => navigateToScreen('ViewStock')}
-              />
-              <HomeButton
-                iconName = "cash"
-                buttonTitle = "View Sold"
-                //onPress = {() => navigateToScreen('ViewSold')}
-              />
-              <HomeButton
-                iconName = "file-document-outline"
-                buttonTitle = "View Transactions"
-                //onPress = {() => navigateToScreen('Transactions')}
-              />
-            </View>
-          ) : (
-            <View>
-              <HomeButton
-                iconName = "briefcase-minus-outline"
-                buttonTitle = "Sell Product"
-                //onPress = {() => navigateToScreen('SellProduct')}
-              />
-              <HomeButton
-                iconName = "hanger"
-                buttonTitle = "View Stock"
-                //onPress = {() => navigateToScreen('ViewStock')}
-              />
-              <HomeButton
-                iconName = "cash"
-                buttonTitle = "View Sold"
-                //onPress = {() => navigateToScreen('ViewSold')}
-              />
-            </View>
-          )
-        }
-
-        <ActionButton
-          iconName = "logout" 
-          buttonTitle = "Logout" 
-          buttonColor = {colors.lightRed}
-          onPress = {logout}
-        />
       </View>
     </ScrollView>
   )

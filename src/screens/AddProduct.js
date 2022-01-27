@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import { Alert, Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
+import { Alert, Dimensions, Image, Modal, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import {RadioButton} from 'react-native-paper';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { colors } from '../config/values';
 import DropDown from '../components/DropDown';
@@ -27,6 +29,9 @@ export default function AddProductScreen({navigation}){
   const [ description, setDescription ] = useState('');
   const [ descriptionError, setDescriptionError ] = useState('');
   const [ expectedSellingPrice, setExpectedSellingPrice ] = useState('');
+  const [ image, setImage ] = useState([]);
+  const [ imageString, setImageString ] = useState('');
+  const [ imageType, setImageType ] = useState('');
   const [ isClotheError, setIsClotheError ] = useState(false);
   const [ isColorError, setIsColorError ] = useState(false);
   const [ isPriceError, setIsPriceError ] = useState(false);
@@ -36,6 +41,13 @@ export default function AddProductScreen({navigation}){
   const [ priceError, setPriceError ] = useState('');
   const [ showAddClothe, setShowAddClothe ] = useState(false);
   const [ size, setSize ] = useState('');
+  const [ visible, setVisible ] = useState(false);
+
+  const imgOptions = {
+    includeBase64: true,
+    maxHeight: 200,
+    maxWidth: 200
+  }
 
   useEffect(() => {
     loadClothe();
@@ -90,6 +102,9 @@ export default function AddProductScreen({navigation}){
         setCategory('');
         setColor('');
         setDescription('');
+        setImage([]);
+        setImageString('');
+        setImageType('');
         setExpectedSellingPrice('');
         setPrice('');
         setSize('');
@@ -122,6 +137,28 @@ export default function AddProductScreen({navigation}){
       setLoading(false);
       LoggerUtil.logError("AddProduct.loadClothe", error);
       alert('error loading clothe');
+    })
+  }
+
+  const selectCamera = async () => {
+    setVisible(false);
+    const result = await launchCamera(imgOptions);
+    result.assets.map(i => {
+      setImageString(i.base64);
+      setImageType(i.type);
+    })
+    setImage(result.assets);
+    LoggerUtil.logInformation("Camera data", result);
+  }
+
+  const selectGallery = async () => {
+    setVisible(false);
+    const result = await launchImageLibrary(imgOptions);
+    LoggerUtil.logInformation("Gallery data", result);
+    setImage(result.assets);
+    result.assets.map(i => {
+      setImageString(i.base64);
+      setImageType(i.type);
     })
   }
 
@@ -182,6 +219,44 @@ export default function AddProductScreen({navigation}){
     })
   }
 
+  const renderImageSelection = () => {
+    return(
+      <View style = {styles.centeredView}>
+        <Modal
+          animationType = "fade"
+          transparent = {true}
+          visible = {visible}
+          onRequestClose = {() => {
+            setVisible(!visible)
+          }}
+        >
+          <View style = {styles.centeredView}>
+            <View style = {styles.modalView}>
+              <Text style = {styles.profileImageText}>Select image</Text>
+              <View style = {styles.selectionView}>
+                <TouchableOpacity style = {styles.cameraView} onPress = {selectCamera}>
+                  <View style = {styles.iconView}>
+                    <Icon name = "camera" size = {38} color = {colors.iconGrey} />
+                  </View>
+                  <Text style = {styles.selectionText}>Camera</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style = {styles.cameraView} onPress = {selectGallery}>
+                  <View style = {styles.iconView}>
+                    <Icon name = "image" size = {38} color = {colors.iconGrey} />
+                  </View>
+                  <Text style = {styles.selectionText}>Gallery</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style = {styles.cancelBtn} onPress = {() => setVisible(false)}>
+                <Text style = {styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+  }
+
   if (loading){
     return(<Loading/>);
   }
@@ -189,6 +264,16 @@ export default function AddProductScreen({navigation}){
   return(
     <ScrollView>
       <View style = {globalStyles.container}>
+        <TouchableOpacity style = {styles.imageView} onPress = {() => setVisible(true)}>
+          {
+            !image.length &&
+            <Icon name = "camera-outline" size = {200} color = {colors.iconGrey} />
+          }
+          {
+            image &&
+            <Image style = {styles.image} source = {{ uri: 'data:' + imageType + ';base64,' + imageString}} />
+          }
+        </TouchableOpacity>
         <DropDown
           placeholder = "Select clothe"
           wdth = {width / 1.3}
@@ -246,7 +331,7 @@ export default function AddProductScreen({navigation}){
             onValueChange = {newVal => setCategory(newVal)}
             value = {category}
           >
-            <View>
+            <View style = {styles.radioButtons}>
               <RadioView val = "gents" text = "Gents"/>
               <RadioView val = "ladies" text = "Ladies"/>
               <RadioView val = "kids" text = "Kids"/>
@@ -312,6 +397,10 @@ export default function AddProductScreen({navigation}){
           />
         </View>
 
+        {
+          renderImageSelection()
+        }
+
         <SubmitButton
           buttonTitle = "Add Product"
           onPress = {addProduct}
@@ -342,6 +431,25 @@ const styles = StyleSheet.create({
     marginTop: 25,
     width: width / 2.3
   },
+  cameraView: {
+    marginRight: 50,
+    width: 50
+  },
+  cancelBtn: {
+    backgroundColor: colors.red,
+    borderColor: colors.borderGrey,
+    borderRadius: 10,
+    borderWidth: 0.5,
+    height: 35,
+    justifyContent: 'center',
+    marginTop: 20,
+    width: width / 6
+  },
+  cancelBtnText:{
+    alignSelf: 'center',
+    color: colors.white,
+    fontSize: 13
+  },
   categoryText: {
     alignSelf: 'flex-start',
     color: colors.black,
@@ -350,6 +458,11 @@ const styles = StyleSheet.create({
   categoryView: {
     marginTop: 10,
     width: width / 1.4
+  },
+  centeredView: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-start'
   },
   clotheAddBtnText: {
     alignSelf: 'center',
@@ -395,8 +508,56 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: 10
   },
+  iconView:{
+    borderColor: colors.borderGrey,
+    borderRadius: 20,
+    borderWidth: 0.2,
+    height: 40,
+    width: 40
+  },
+  image: {
+    borderRadius: 5,
+    height: 200,
+    width: 200
+  },
+  imageView: {
+    alignSelf: 'center',
+    borderColor: colors.borderGrey,
+    borderRadius: 5,
+    borderWidth: 0.5,
+    height: 200,
+    width: 200
+  },
+  modalView: {
+    alignItems: 'center',
+    backgroundColor: colors.cream,
+    borderRadius: 20,
+    elevation: 5,
+    marginTop: 70,
+    padding: 10,
+    shadowOffset: {
+      height: 2,
+      width: 0
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4
+  },
+  profileImageText: {
+    color: colors.black,
+    fontSize: 14
+  },
   radioButtons:{
     flexDirection: 'row'
+  },
+  selectionText: {
+    color: colors.black,
+    fontSize: 12,
+    justifyContent: 'space-around'
+  },
+  selectionView: {
+    flexDirection: 'row',
+    marginTop: 10,
+    width: width / 2.3
   },
   sizeView: {
     flexDirection: 'row',
