@@ -143,11 +143,13 @@ export default function AddProductScreen({navigation}){
   const selectCamera = async () => {
     setVisible(false);
     const result = await launchCamera(imgOptions);
-    result.assets.map(i => {
-      setImageString(i.base64);
-      setImageType(i.type);
-    })
-    setImage(result.assets);
+    if (result.didCancel !== true) {
+      result.assets.map(i => {
+        setImageString(i.base64);
+        setImageType(i.type);
+      })
+      setImage(result.assets);
+    }
     LoggerUtil.logInformation("Camera data", result);
   }
 
@@ -155,11 +157,13 @@ export default function AddProductScreen({navigation}){
     setVisible(false);
     const result = await launchImageLibrary(imgOptions);
     LoggerUtil.logInformation("Gallery data", result);
-    setImage(result.assets);
-    result.assets.map(i => {
-      setImageString(i.base64);
-      setImageType(i.type);
-    })
+    if (result.didCancel !== true) {
+      setImage(result.assets);
+      result.assets.map(i => {
+        setImageString(i.base64);
+        setImageType(i.type);
+      })
+    }
   }
 
   const selectClothe = (val) =>{
