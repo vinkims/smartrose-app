@@ -19,6 +19,34 @@ module.exports = {
         return dateObject       
     },
 
+    formatDaysOfWeek(dateString) {
+        let dayOfWeek = "Mon";
+        switch(dateString) {
+            case 1:
+                dayOfWeek = "Mon";
+                break;
+            case 2:
+                dayOfWeek = "Tue";
+                break;
+            case 3:
+                dayOfWeek = "Wed";
+                break;
+            case 4:
+                dayOfWeek = "Thu";
+                break;
+            case 5:
+                dayOfWeek = "Fri";
+                break;
+            case 6:
+                dayOfWeek = "Sat";
+                break;
+            case 0:
+                dayOfWeek = "Sun";
+                break;
+        }
+        return dayOfWeek;
+    },
+
     formatPhoneNumber(phoneNo){
         if (phoneNo.startsWith("0")){
             return phoneNo.replace("0", "254")
