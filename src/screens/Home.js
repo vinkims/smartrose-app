@@ -81,13 +81,19 @@ export default function HomeScreen({navigation}){
     labels: weeklyLabels,
     datasets: [
       {
-        data: gentsWeeklyTotal
+        data: gentsWeeklyTotal,
+        color: (opacity = 1) => '#003049',
+        strokeWidth: 2,
       },
       {
-        data: kidsWeeklyTotal
+        data: kidsWeeklyTotal,
+        color: (opacity = 1) => '#d62828',
+			  strokeWidth: 2,
       },
       {
-        data: ladiesWeeklyTotal
+        data: ladiesWeeklyTotal,
+        color: (opacity = 1) => '#f77f00',
+			  strokeWidth: 2,
       }
     ]
   }
@@ -156,9 +162,18 @@ export default function HomeScreen({navigation}){
             previousWeekSale.push(item.totalSalePrice);
           });
           setCurrentWeekSaleData(resp.content.currentWeekSale);
-          getWeeklyGentsData(resp.content.gentsWeeklyTotal);
-          getWeeklyKidsData(resp.content.kidsWeeklyTotal);
-          getWeeklyLadiesData(resp.content.ladiesWeeklyTotal);
+          resp.content.gentsTotal.map((item, index) => {
+            gentsWeeklyTotal.splice(index, 4);
+            gentsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+          });
+          resp.content.kidsTotal.map((item, index) => {
+            kidsWeeklyTotal.splice(index, 4);
+            kidsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+          });
+          resp.content.ladiesTotal.map((item, index) => {
+            ladiesWeeklyTotal.splice(index, 4);
+            ladiesWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+          });
         }
       })
       .catch(error => {
@@ -166,34 +181,6 @@ export default function HomeScreen({navigation}){
         LoggerUtil.logError("Home.getReport", error);
         ToastAndroid.show("Error getting report", ToastAndroid.LONG);
       })
-  }
-
-  const getWeeklyGentsData = (data) => {
-    var gentsData = data;
-    var dataSize = Object.keys(data).length;
-    gentsWeeklyTotal.splice(0, dataSize - 1);
-    gentsWeeklyTotal.push(gentsData.weekOne === null ? 0 : gentsData.weekOne);
-    gentsWeeklyTotal.push(gentsData.weekTwo === null ? 0 : gentsData.weekTwo);
-    gentsWeeklyTotal.push(gentsData.weekThree === null ? 0 : gentsData.weekThree);
-    gentsWeeklyTotal.push(gentsData.weekFour === null ? 0 : gentsData.weekFour);
-  }
-
-  const getWeeklyKidsData = (data) => {
-    var dataSize = Object.keys(data).length;
-    kidsWeeklyTotal.splice(0, dataSize - 1);
-    kidsWeeklyTotal.push(data.weekOne === null ? 0 : data.weekOne);
-    kidsWeeklyTotal.push(data.weekTwo === null ? 0 : data.weekTwo);
-    kidsWeeklyTotal.push(data.weekThree === null ? 0 : data.weekThree);
-    kidsWeeklyTotal.push(data.weekFour === null ? 0 : data.weekFour);
-  }
-
-  const getWeeklyLadiesData = (data) => {
-    var dataSize = Object.keys(data).length;
-    ladiesWeeklyTotal.splice(0, dataSize - 1);
-    ladiesWeeklyTotal.push(data.weekOne === null ? 0 : data.weekOne);
-    ladiesWeeklyTotal.push(data.weekTwo === null ? 0 : data.weekTwo);
-    ladiesWeeklyTotal.push(data.weekThree === null ? 0 : data.weekThree);
-    ladiesWeeklyTotal.push(data.weekFour === null ? 0 : data.weekFour);
   }
 
   const logout = async() =>{
@@ -284,7 +271,9 @@ export default function HomeScreen({navigation}){
         <View style = {styles.saleView}>
             { renderWeeklyData() }
         </View>
-        <View>
+        <View style = {styles.lineChartView}>
+          <Text style = {styles.heading}>Weekly total by category</Text>
+          <View style={{marginTop: 10}}/>
           <LineChart
             data = {lineChartData}
             fillShadowGradient = "#ccc"
@@ -293,6 +282,18 @@ export default function HomeScreen({navigation}){
             legend = {lineChartLegends}
             chartConfig = {lineChartConfig}
           />
+          <View style = {styles.legendContainer}>
+            {
+              lineChartLegends.map(({name, color}) => {
+                return <View style = {styles.legendView}>
+                  <View style = {[styles.legendColorContainer, {backgroundColor: color}]}></View>
+                  <View style = {styles.legendTextContainer}>
+                    <Text style = {styles.legendText}>{name}</Text>
+                  </View>
+                </View>
+              })
+            }
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -316,10 +317,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10
   },
+  lineChartView: {
+    marginTop: 10
+  },
   heading: {
     alignSelf: 'center',
     color: colors.black,
     fontSize: 15
+  },
+  legendColorContainer: {
+    height: 10,
+    width: 10,
+  },
+  legendContainer: {
+    alignItems: 'center',
+    flex: 1
+  },
+  legendText: {
+    fontSize: 12
+  },
+  legendTextContainer: {
+    paddingLeft: 8
+  },
+  legendView: {
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   saleView:{
     height: 300,
