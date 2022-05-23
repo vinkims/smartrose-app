@@ -30,8 +30,10 @@ export default function AddProductScreen({navigation}){
   const [ descriptionError, setDescriptionError ] = useState('');
   const [ expectedSellingPrice, setExpectedSellingPrice ] = useState('');
   const [ image, setImage ] = useState([]);
+  const [ imageName, setImageName ] = useState('');
   const [ imageString, setImageString ] = useState('');
   const [ imageType, setImageType ] = useState('');
+  const [ imageUri, setImageUri ] = useState('');
   const [ isClotheError, setIsClotheError ] = useState(false);
   const [ isColorError, setIsColorError ] = useState(false);
   const [ isPriceError, setIsPriceError ] = useState(false);
@@ -97,12 +99,14 @@ export default function AddProductScreen({navigation}){
     .then(resp => {
       LoggerUtil.logDebug(resp);
       if (resp.status === 201){
+        if (image != null) {
+          uploadImage(resp.content.id);
+        }
         setLoading(false);
         ToastAndroid.show("Product added successfully", ToastAndroid.SHORT);
         setCategory('');
         setColor('');
         setDescription('');
-        setImage([]);
         setImageString('');
         setImageType('');
         setExpectedSellingPrice('');
@@ -113,6 +117,7 @@ export default function AddProductScreen({navigation}){
         Alert.alert("Error", JSON.stringify(resp.validationError.errors, null, 2));
       }
     })
+    .then(setImage([]))
     .catch(error => {
       setLoading(false);
       LoggerUtil.logError("Error saving product", error);
@@ -145,8 +150,10 @@ export default function AddProductScreen({navigation}){
     const result = await launchCamera(imgOptions);
     if (result.didCancel !== true) {
       result.assets.map(i => {
+        setImageName(i.fileName);
         setImageString(i.base64);
         setImageType(i.type);
+        setImageUri(i.uri);
       })
       setImage(result.assets);
     }
@@ -220,6 +227,32 @@ export default function AddProductScreen({navigation}){
     .catch(error => {
       LoggerUtil.logError("AddProduct.updateClotheList", error);
       ToastAndroid.show("Error getting updated list", ToastAndroid.SHORT);
+    })
+  }
+
+  const uploadImage = async (clotheItemId) => {
+    const imageData = new FormData();
+    imageData.append('title', clothe);
+    imageData.append('description', description !== '' ? description : clothe);
+    imageData.append('clotheItemId', JSON.stringify(clotheItemId));
+    imageData.append('file', {
+      uri: imageUri,
+      name: imageName,
+      type: imageType
+    });
+
+    await ServerCommunication.uploadImage(imageData)
+    .then(resp => {
+      if (resp.status === 200) {
+        ToastAndroid.show("Image uploaded successfully", ToastAndroid.SHORT);
+        setImage([]);
+      } else if (resp.validationError.errors) {
+        ToastAndroid.show("Error uploading image", ToastAndroid.SHORT);
+      }
+    })
+    .catch(error => {
+      LoggerUtil.logError("AddProduct.uploadImage", error);
+      ToastAndroid.show("Problem uploading image", ToastAndroid.LONG);
     })
   }
 

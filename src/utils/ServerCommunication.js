@@ -74,6 +74,32 @@ function post(url, payload){
 }
 
 
+function postImage(url, payload) {
+  return new Promise(async(resolve, reject) => {
+    StorageUtil.getToken()
+    .then(token => {
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: '*/*',
+          'Content-Type' : 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        },
+        body: payload
+      })
+      .then(resp => basicResponseHandler(url, resp))
+      .then(respJson => {
+        resolve(respJson);
+      })
+      .catch(error => {
+        LoggerUtil.logError(`Error posting to ${url}`, error);
+        reject(error);
+      })
+    })
+  })
+}
+
+
 function postNoAuth(url, payload){
   return new Promise(async(resolve, reject) =>{
     try{
@@ -162,5 +188,9 @@ export default{
 
   async logout(payload){
     return post(`${Config.API_URL}/user/auth/sign-out`, payload)
-  }
+  },
+
+  async uploadImage(payload) {
+    return postImage(`${Config.API_URL}/image/upload`, payload)
+  },
 }

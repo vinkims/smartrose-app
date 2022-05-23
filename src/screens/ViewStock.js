@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { ActivityIndicator, Dimensions, Image, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Config from 'react-native-config';
 
 import DropDown from '../components/DropDown';
 import globalStyles from '../config/globalStyles';
@@ -10,6 +11,8 @@ import ServerCommunication from '../utils/ServerCommunication';
 import { colors, values } from '../config/values';
 
 const {width, height} = Dimensions.get('window');
+
+var aws = require('aws-sdk');
 
 export default function ViewStockScreen({navigation}){
 
@@ -109,7 +112,7 @@ export default function ViewStockScreen({navigation}){
         setItemCount(resp.content.data.length);
       }else{
         setLoading(false);
-        alert('No products found in stock');
+        ToastAndroid.show("No products found in stock", ToastAndroid.LONG);
       }
     })
   }
@@ -128,9 +131,9 @@ export default function ViewStockScreen({navigation}){
     setShowFilter(true);
   }
 
-  const sell = (id) => {
+  const sell = (id, url) => {
     LoggerUtil.logInformation("Product id: ", id);
-    navigation.navigate('SaleConfirm', {prodId: id});
+    navigation.navigate('SaleConfirm', {prodId: id, signed: url});
   }
   
   if (loading){
@@ -138,12 +141,32 @@ export default function ViewStockScreen({navigation}){
   }
 
   const renderClothes = (data) => {
+    let signedUrl;
+    var s3 = new aws.S3({
+      accessKeyId: Config.AWS_ACCESS_KEY_ID, 
+      secretAccessKey: Config.AWS_SECRET_ACCESS_KEY, 
+      region:'us-east-1',
+      signatureVersion: "v4"
+    });
+    var params = {Bucket: 'smartrose', Key: `images/${data.image.name}`};
+    if (Object.keys(data.image).length > 0){
+      signedUrl = s3.getSignedUrl('getObject', params);
+    }
+
+    LoggerUtil.logDebug("Signed URL", signedUrl);
     return(
-      <TouchableOpacity style = {styles.clotheView} onPress = {() => sell(data.id)}>
-        <Image 
-          source = {require('../resources/images/clothes.jpg')} 
-          style = {styles.image}
-        />
+      <TouchableOpacity style = {styles.clotheView} onPress = {() => sell(data.id, signedUrl)}>
+        {
+          typeof signedUrl === 'undefined' ?
+          <Image
+            source = {require('../resources/images/clothes.jpg')}
+            style = {styles.image}
+          /> :
+          <Image
+            source = {{uri: signedUrl}}
+            style = {styles.image}
+          />
+        }
         <View style = {styles.colorView}>
           <Text style = {styles.nameText}>{data.clotheName}</Text>
           <Text style = {styles.nameDescText}> {data.description}</Text>

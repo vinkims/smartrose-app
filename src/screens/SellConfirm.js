@@ -14,17 +14,18 @@ import SubmitButton from '../components/SubmitButton';
 import TextDisplay from '../components/TextDisplay';
 import { values } from '../config/values';
 
-const { width, height } = Dimensions.get('screen')
+const { width, height } = Dimensions.get('screen');
 
 export default function SaleConfirmationScreen({route, navigation}){
 
-  const { prodId } = route.params;
+  const { prodId, signed } = route.params;
 
   const [ category, setCategory ] = useState('');
   const [ clothe, setClothe ] = useState('');
   const [ clotheItemId, setClotheItemId ] = useState(0);
   const [ color, setColor ] = useState('');
   const [ description, setDescription ] = useState('');
+  const [ imageUrl, setImageUrl ] = useState('');
   const [ isPriceError, setIsPriceError ] = useState(false);
   const [ loading, setLoading ] = useState(false);
   const [ expPrice, setExpPrice ] = useState(0);
@@ -56,13 +57,16 @@ export default function SaleConfirmationScreen({route, navigation}){
     await ServerCommunication.get(`${Config.API_URL}/clothe/item/${prodId}`)
     .then(resp => {
       if (resp.status === 200){
-        setCategory(resp.content.category)
-        setClothe(resp.content.clotheName)
-        setClotheItemId(resp.content.id)
-        setColor(resp.content.color)
-        setDescription(resp.content.description)
-        setExpPrice(resp.content.expectedSellingPrice)
-        setSize(resp.content.size)
+        setCategory(resp.content.category);
+        setClothe(resp.content.clotheName);
+        setClotheItemId(resp.content.id);
+        setColor(resp.content.color);
+        setDescription(resp.content.description);
+        setExpPrice(resp.content.expectedSellingPrice);
+        setSize(resp.content.size);
+        if (Object.keys(resp.content.image).length > 0) {
+          setImageUrl(signed);
+        }
       }
     })
   }
@@ -107,10 +111,18 @@ export default function SaleConfirmationScreen({route, navigation}){
   return(
     <ScrollView>
       <View style = {globalStyles.container}>
-        <Image 
-          source = {require('../resources/images/clothes.jpg')}
-          style = {styles.image}
-        />
+        {
+          !imageUrl ?
+          <Image
+            source = {require('../resources/images/clothes.jpg')}
+            style = {styles.image}
+          />
+          :
+          <Image
+            source = {{uri: imageUrl}}
+            style = {styles.image}
+          />
+        }
         <View style = {styles.detailsView}>
           <TextDisplay
             heading = "DESC"

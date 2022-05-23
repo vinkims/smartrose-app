@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {ActivityIndicator ,Dimensions, Image, ScrollView, StyleSheet, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Config from 'react-native-config';
 
 import { colors } from "../config/values";
 import FormattingUtil from "../utils/FormattingUtil";
@@ -12,7 +13,9 @@ import ServerCommunication from "../utils/ServerCommunication";
 
 const {width, height} = Dimensions.get('screen');
 
-export default function ViewSoldScreen({}){
+var aws = require('aws-sdk');
+
+export default function ViewSoldScreen({navigation}){
 
   const [ endDate, setEndDate ] = useState(new Date());
   const [ loading, setLoading ] = useState(false);
@@ -26,8 +29,11 @@ export default function ViewSoldScreen({}){
   const [ totalSP, setTotalSP ] = useState(0);
 
   useEffect(() => {
-    loadSold()
-  }, [])
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadSold();
+    })
+    return unsubscribe;
+  }, [navigation])
 
   const getSaleSummary = async() => {
     
@@ -86,12 +92,32 @@ export default function ViewSoldScreen({}){
   }
 
   const renderClothe = (cl) => {
+    let signedUrl;
+    var s3 = new aws.S3({
+      accessKeyId: Config.AWS_ACCESS_KEY_ID, 
+      secretAccessKey: Config.AWS_SECRET_ACCESS_KEY, 
+      region:'us-east-1',
+      signatureVersion: "v4"
+    });
+    if (Object.keys(cl.clotheDetails.image).length > 0) {
+      var params = {Bucket: 'smartrose', Key: `images/${cl.clotheDetails.image.name}`};
+      signedUrl = s3.getSignedUrl('getObject', params);
+    }
+
     return(
       <View style = {styles.clotheView}>
-        <Image
-          source = {require('../resources/images/clothes.jpg')}
-          style = {styles.image}
-        />
+        {
+          typeof signedUrl === 'undefined' ?
+          <Image
+            source = {require('../resources/images/clothes.jpg')}
+            style = {styles.image}
+          />
+          :
+          <Image
+            source = {{uri: signedUrl}}
+            style = {styles.image}
+          />
+        }
         <View style = {styles.soldDateView}>
           <Text style = {[styles.boldText, styles.soldText]}>{FormattingUtil.formatDate(cl.dateSold)}</Text>
           <View style = {styles.priceView}>
