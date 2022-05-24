@@ -15,7 +15,6 @@
     "@aws-sdk/credential-provider-cognito-identity": "^3.95.0",
     "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/datetimepicker": "^3.2.0",
-    "@react-native-community/masked-view": "^0.1.10",
     "@react-native-masked-view/masked-view": "^0.2.6",
     "@react-navigation/drawer": "^6.1.8",
     "@react-navigation/native": "^6.0.6",

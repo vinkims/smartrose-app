@@ -152,8 +152,7 @@ export default function ViewStockScreen({navigation}){
     if (Object.keys(data.image).length > 0){
       signedUrl = s3.getSignedUrl('getObject', params);
     }
-
-    LoggerUtil.logDebug("Signed URL", signedUrl);
+    
     return(
       <TouchableOpacity style = {styles.clotheView} onPress = {() => sell(data.id, signedUrl)}>
         {
