@@ -1,38 +1,28 @@
-import React, {useEffect} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect } from 'react';
+
 import Loading from '../components/Loading';
+import NavigationService from '../services/NavigationService';
+import StorageUtil from '../utils/StorageUtil';
 
 export default function AuthLoadingScreen({navigation}){
 
-    useEffect(() =>{
-        checkUserStatus();
-    }, [])
+  useEffect(() =>{
+      checkUserStatus();
+  }, [])
 
+  /**
+   * Check if user is logged in or not
+   */
+  const checkUserStatus = async () =>{
+    await StorageUtil.getToken()
+    .then(value =>{
+      if(value != null){
+        NavigationService.reset('Main');
+      }else {
+        NavigationService.reset('Login');
+      }
+    })
+  }
 
-    /**
-     * Check if user is logged in or not
-     */
-    const checkUserStatus = () =>{
-
-        AsyncStorage.getItem("token")
-        .then(value =>{
-            if(value != null){
-                navigation.reset({
-                    index: 0,
-                    routes: [{name: 'Home'}]
-                })
-            }else {
-                navigation.reset({
-                    index: 0,
-                    routes: [{name: 'Login'}]
-                })
-            }
-        })
-        
-    }
-
-
-    return(
-        <Loading/>
-    );
+  return( <Loading/> );
 }
