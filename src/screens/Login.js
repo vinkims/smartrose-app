@@ -75,7 +75,7 @@ export default function LoginScreen({navigation}){
   <ScrollView>
     <View style = {[globalStyles.container, styles.centerView]}>
       <Image
-        source = {require('../resources/images/Smartrose_logo.jpeg')}
+        source = {require('../resources/images/Smartrose_full.jpeg')}
         style = {styles.image}
       />
       <View style = {styles.formView}>
@@ -133,8 +133,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   image: {
-    borderRadius: width / 4.6,
-    height: width / 2.3,
-    width: width / 2.3
+    borderRadius: width / 4.4,
+    height: width / 2.2,
+    width: width / 2.2
   }
 })
