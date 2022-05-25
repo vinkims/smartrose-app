@@ -1,13 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
 import jwt_decode from 'jwt-decode';
-import { LineChart, StackedBarChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
 
 import { colors } from '../config/values';
-import ActionButton from '../components/ActionButton';
 import FormattingUtil from '../utils/FormattingUtil';
 import globalStyles from '../config/globalStyles';
-import HomeButton from '../components/HomeButton';
 import Loading from '../components/Loading';
 import LoggerUtil from '../utils/LoggerUtil';
 import NavigationService from '../services/NavigationService';
@@ -23,14 +21,16 @@ export default function HomeScreen({navigation}){
   const [currentWeekSaleData, setCurrentWeekSaleData] = useState([]);
   const [currentLabelDays, setCurrentLabelDays] = useState(["M", "T", "W", "T", "F", "S", "S"]);
   const [currentWeekSale, setCurrentWeekSale] = useState([0,0,0,0,0,0,0]);
+  const [gentsTotal, setGentsTotal] = useState([]);
   const [gentsWeeklyTotal, setGentsWeeklyTotal] = useState([0,0,0,0]);
+  const [kidsTotal, setKidsTotal] = useState([]);
   const [kidsWeeklyTotal, setKidsWeeklyTotal] = useState([0,0,0,0]);
+  const [ladiesTotal, setLadiesTotal] = useState([]);
   const [ladiesWeeklyTotal, setLadiessWeeklyTotal] = useState([0,0,0,0]);
   const [loading, setLoading] = useState(false);
   const [previousLabelDays, setPreviousLabelDays] = useState(["M", "T", "W", "T", "F", "S", "S"]);
   const [previousWeekSale, setPreviousWeekSale] = useState([0,0,0,0,0,0,0]);
   const [user, setUser] = useState('');
-  const [weeklyData, setWeeklyData] = useState([]);
   const [weeklyLabels, setWeeklyLabels] = useState(["Week1", "Week2", "Week3", "Week4"]);
 
   useEffect(() =>{
@@ -162,18 +162,9 @@ export default function HomeScreen({navigation}){
             previousWeekSale.push(item.totalSalePrice);
           });
           setCurrentWeekSaleData(resp.content.currentWeekSale);
-          resp.content.gentsTotal.map((item, index) => {
-            gentsWeeklyTotal.splice(index, 4);
-            gentsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
-          });
-          resp.content.kidsTotal.map((item, index) => {
-            kidsWeeklyTotal.splice(index, 4);
-            kidsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
-          });
-          resp.content.ladiesTotal.map((item, index) => {
-            ladiesWeeklyTotal.splice(index, 4);
-            ladiesWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
-          });
+          setGentsTotal(resp.content.gentsTotal);
+          setKidsTotal(resp.content.kidsTotal);
+          setLadiesTotal(resp.content.ladiesTotal);
         }
       })
       .catch(error => {
@@ -218,6 +209,47 @@ export default function HomeScreen({navigation}){
   const removeToken = () =>{
     StorageUtil.removeKeys();
     NavigationService.reset("Login");
+  }
+
+  const renderWeeklyCategoryData = () => {
+    gentsTotal.map((item, index) => {
+      gentsWeeklyTotal.splice(index, 4);
+      gentsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+    });
+    kidsTotal.map((item, index) => {
+      kidsWeeklyTotal.splice(index, 4);
+      kidsWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+    });
+    ladiesTotal.map((item, index) => {
+      ladiesWeeklyTotal.splice(index, 4);
+      ladiesWeeklyTotal.push(item.totalSales === null ? 0 : item.totalSales);
+    });
+    return(
+      <View style = {styles.lineChartView}>
+        <Text style = {styles.heading}>Weekly total by category</Text>
+        <View style = {{marginTop: 10}}/>
+        <LineChart
+          data = {lineChartData}
+          fillShadowGradient = "#ccc"
+          width = {width / 1.05}
+          height = {270}
+          legend = {lineChartLegends}
+          chartConfig = {lineChartConfig}
+        />
+        <View style = {styles.legendContainer}>
+            {
+              lineChartLegends.map(({name, color}) => {
+                return <View style = {styles.legendView}>
+                  <View style = {[styles.legendColorContainer, {backgroundColor: color}]}></View>
+                  <View style = {styles.legendTextContainer}>
+                    <Text style = {styles.legendText}>{name}</Text>
+                  </View>
+                </View>
+              })
+            }
+          </View>
+      </View>
+    );
   }
 
   const renderWeeklyData = () => {
@@ -271,30 +303,7 @@ export default function HomeScreen({navigation}){
         <View style = {styles.saleView}>
             { renderWeeklyData() }
         </View>
-        <View style = {styles.lineChartView}>
-          <Text style = {styles.heading}>Weekly total by category</Text>
-          <View style={{marginTop: 10}}/>
-          <LineChart
-            data = {lineChartData}
-            fillShadowGradient = "#ccc"
-            width = {width / 1.05}
-            height = {270}
-            legend = {lineChartLegends}
-            chartConfig = {lineChartConfig}
-          />
-          <View style = {styles.legendContainer}>
-            {
-              lineChartLegends.map(({name, color}) => {
-                return <View style = {styles.legendView}>
-                  <View style = {[styles.legendColorContainer, {backgroundColor: color}]}></View>
-                  <View style = {styles.legendTextContainer}>
-                    <Text style = {styles.legendText}>{name}</Text>
-                  </View>
-                </View>
-              })
-            }
-          </View>
-        </View>
+        { renderWeeklyCategoryData() }
       </View>
     </ScrollView>
   )
