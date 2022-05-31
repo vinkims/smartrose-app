@@ -1,5 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import firebase from '@react-native-firebase/app';
+import messaging from '@react-native-firebase/messaging';
 import jwt_decode from 'jwt-decode';
 import { LineChart } from 'react-native-chart-kit';
 
@@ -43,6 +46,10 @@ export default function HomeScreen({navigation}){
     })
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    checkFCMToken();
+  }, []);
 
   const chartConfig = {
     backgroundGradientFrom: "#1E2923",
@@ -124,6 +131,59 @@ export default function HomeScreen({navigation}){
 
   const signup = () =>{
     navigation.navigate('Signup');
+  }
+
+  const addFCMToken = async () => {
+    let deviceName;
+    await DeviceInfo.getDeviceName()
+    .then(name => {
+      deviceName = name;
+    });
+
+    let tokenStr;
+    await messaging().getToken(firebase.app().options.messagingSenderId)
+    .then(token => {
+      tokenStr = token;
+    })
+    .catch(err => {
+      LoggerUtil.logError("Error getting FCM token", err);
+    })
+
+    const tokenDetails = {
+      deviceName: deviceName,
+      token: tokenStr
+    }
+
+    await ServerCommunication.addToken(tokenDetails)
+    .then(resp => {
+      if (resp.status === 201) {
+        StorageUtil.storeFCMTime(new Date().getTime());
+        LoggerUtil.logDebug("FCM token added successfully");
+      } else if (resp.validationError.errors) {
+        LoggerUtil.logError("Validation error: ", resp.validationError.errors);
+      }
+    })
+    .catch(err => {
+      LoggerUtil.logError("Home.addToken", err);
+    })
+  }
+
+  const checkFCMToken = async () => {
+    let fcmTime = await StorageUtil.getFCMTime();
+
+    const dateNow = new Date().getTime();
+    const expiryTime = dateNow + 1000 * 60 * 60 * 24 * 20;
+
+    if (fcmTime === null) {
+      // addToken
+      addFCMToken();
+    }
+
+    if (fcmTime !== null && fcmTime > expiryTime) {
+      // replace token
+      LoggerUtil.logDebug("Replacing FCM token");
+      addFCMToken();
+    }
   }
 
   const checkTokenValidity = async() =>{

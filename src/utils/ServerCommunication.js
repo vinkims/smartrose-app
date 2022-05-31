@@ -162,6 +162,10 @@ export default{
     return post(`${Config.API_URL}/clothe/item`, payload)
   },
 
+  async addToken(payload) {
+    return post(`${Config.API_URL}/token`, payload)
+  },
+
   async getClotheItemInStock(){
     return get(`${Config.API_URL}/clothe/item?q=status.idEQ1&pgSize=1000`)
   },

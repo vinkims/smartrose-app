@@ -1,12 +1,29 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoggerUtil from './LoggerUtil';
 
+const FCMTIME = "fcmTime";
 const TOKEN = "accessToken";
 const USERID = "userId";
 
 let storageKeys = [];
 
 export default {
+
+  async getFCMTime() {
+    return new Promise((resolve, reject) => {
+      AsyncStorage.getItem(FCMTIME)
+      .then(value => {
+        if (value === null) {
+          return resolve(null);
+        }
+        resolve(value);
+      })
+      .catch(error => {
+        LoggerUtil.logError("error reading from storage", error);
+        reject(error);
+      })
+    })
+  },
 
   async getToken(){
     return new Promise((resolve, reject) => {
@@ -49,6 +66,13 @@ export default {
     } catch(error){
       LoggerUtil.logError("Error removing keys", error);
     }
+  },
+
+  async storeFCMTime(fcmTime) {
+    await AsyncStorage.setItem(FCMTIME, JSON.stringify(fcmTime))
+    .catch(error => {
+      LoggerUtil.logError("error saving fcm time", error);
+    })
   },
 
   async storeToken(token){
