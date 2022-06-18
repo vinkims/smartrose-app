@@ -99,9 +99,11 @@ export default function ViewSoldScreen({navigation}){
       region:'us-east-1',
       signatureVersion: "v4"
     });
-    if (Object.keys(cl.clotheDetails.image).length > 0) {
-      var params = {Bucket: 'smartrose', Key: `images/${cl.clotheDetails.image.name}`};
-      signedUrl = s3.getSignedUrl('getObject', params);
+    if (typeof cl.clotheDetails.image !== 'undefined') {
+      if (Object.keys(cl.clotheDetails.image).length > 0) {
+        var params = {Bucket: 'smartrose', Key: `images/${cl.clotheDetails.image.name}`};
+        signedUrl = s3.getSignedUrl('getObject', params);
+      }
     }
 
     return(
