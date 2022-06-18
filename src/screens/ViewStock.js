@@ -148,9 +148,11 @@ export default function ViewStockScreen({navigation}){
       region:'us-east-1',
       signatureVersion: "v4"
     });
-    var params = {Bucket: 'smartrose', Key: `images/${data.image.name}`};
-    if (Object.keys(data.image).length > 0){
-      signedUrl = s3.getSignedUrl('getObject', params);
+    if (typeof data.image !== 'undefined'){
+      var params = {Bucket: 'smartrose', Key: `images/${data.image.name}`};
+      if (Object.keys(data.image).length > 0){
+        signedUrl = s3.getSignedUrl('getObject', params);
+      }
     }
     
     return(
