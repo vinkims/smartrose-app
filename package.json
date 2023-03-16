@@ -23,7 +23,6 @@
     "@react-navigation/native-stack": "^6.2.5",
     "@react-navigation/stack": "^6.0.11",
     "aws-sdk": "^2.1140.0",
-    "fsevents": "^2.3.2",
     "jwt-decode": "^3.1.2",
     "native-base": "^2.15.2",
     "react": "16.13.1",

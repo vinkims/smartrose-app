@@ -2,6 +2,10 @@ apply plugin: "com.android.application"
 
 apply plugin: 'com.google.gms.google-services'
 
+apply plugin: 'maven-publish'
+
+apply plugin: 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 project.ext.envConfigFiles = [
